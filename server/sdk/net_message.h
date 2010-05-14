@@ -45,6 +45,8 @@ class NetMessage {
 
   explicit NetMessage(size_t reserved_size);
 
+  NetMessage(const NetMessage& other);
+
   // ====================  ACCESSORS     =======================================
   bool              is_dynamic() const;
   // STL-like support
@@ -88,6 +90,9 @@ inline NetMessage::NetMessage(size_t reserved_size) : static_size_(0) {
   this->Reserve(reserved_size);
 }
 
+inline NetMessage::NetMessage(const NetMessage& other) {
+  *this = other;
+}
 
 inline bool NetMessage::is_dynamic() const {
   return dynamic_data_;
