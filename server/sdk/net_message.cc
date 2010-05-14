@@ -119,4 +119,46 @@ std::streamsize NetMessage::Write(const char_type* data, std::streamsize n) {
   return n;
 }
 
+
+void NetMessage::insert(iterator position, 
+                        const_iterator first, 
+                        const_iterator last) {
+  assert(position == this->end() 
+         || (position >= static_data_ 
+             && position < static_data_ + static_size_));
+
+  if (first > last)
+    std::swap(first, last);
+
+  size_t n = last - first;
+
+  if (position >= this->end()) {
+    this->Write(first, n);
+    return;
+  }
+
+  size_t offset = 0;
+
+  if (!this->is_dynamic()) {
+    if (n + static_size_ <= kDynamicThreshold) {
+      std::copy(position, 
+                static_data_ + static_size_,
+                position + n);
+      std::copy(first, last, 
+                position);
+      static_size_ += n;
+      return;
+    } else {
+      offset = position - static_data_;
+      this->SetDynamic();
+    }
+  } else {
+    offset = position - &((*dynamic_data_)[0]);
+  }
+
+  dynamic_data_->insert(dynamic_data_->begin() + offset, 
+                        first, last);
+}
+
+
 } // --- end of eddy

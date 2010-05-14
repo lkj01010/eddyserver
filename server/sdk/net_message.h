@@ -35,8 +35,10 @@ class NetMessage {
   // ====================  TYPEDEFS      =======================================
   // STL-like iterator support
   typedef char              char_type;
+  typedef char_type         value_type;
   typedef char_type*        iterator;
   typedef const char_type*  const_iterator;
+  typedef size_t            size_type;
 
   // ====================  LIFECYCLE     =======================================
   NetMessage();
@@ -52,6 +54,9 @@ class NetMessage {
   iterator          end();
   const_iterator    end() const;
   bool              empty() const;
+  void              insert(iterator position, 
+                           const_iterator first, 
+                           const_iterator last);
 
   // ====================  OPERATIIONS   =======================================
   void  Swap(NetMessage& other);
