@@ -1,0 +1,11 @@
+third_party
+tags
+CMakeCache.txt
+CMakeFiles.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+bin
+lib
+core
+cscope.out
