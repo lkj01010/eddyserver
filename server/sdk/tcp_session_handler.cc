@@ -95,6 +95,7 @@ void CloseSession(TCPIOThread& thread, TCPSessionID id) {
     return;
 
   session->Close();
+  thread.session_queue().Remove(id);
 }
 }
 

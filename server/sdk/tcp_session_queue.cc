@@ -49,8 +49,7 @@ TCPSessionQueue::SessionPointer TCPSessionQueue::Get(TCPSessionID id) {
 }
 
 void TCPSessionQueue::Clear() {
-  while (!map_.empty())
-    map_.begin()->second->Close();
+  map_.clear();
 }
 
 } // end of namespace

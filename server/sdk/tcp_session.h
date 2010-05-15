@@ -68,13 +68,11 @@ class TCPSession : public boost::enable_shared_from_this<TCPSession>,
       // called by TCPIOThreadManager
       void Init(TCPSessionID id);
       // handles read
-      static void HandleRead(boost::weak_ptr<TCPSession> weak_session,
-                             const boost::system::error_code& error, 
-                             size_t bytes_transferred);
+      void HandleRead(const boost::system::error_code& error, 
+                      size_t bytes_transferred);
       // handles write
-      static void HandleWrite(boost::weak_ptr<TCPSession> weak_session,
-                              const boost::system::error_code& error,
-                              size_t bytes_transferred);
+      void HandleWrite(const boost::system::error_code& error,
+                       size_t bytes_transferred);
       // ====================  DATA MEMBERS  =======================================
       TCPSessionID                  id_;
       TCPIOThread&                  thread_;

@@ -20,6 +20,7 @@
 #include    <cassert>
 
 #include    <boost/asio.hpp> 
+#include    <boost/asio/error.hpp> 
 #include    <boost/bind.hpp> 
 
 #include    "sdk/tcp_io_thread_manager.h"
@@ -54,7 +55,7 @@ void TCPSession::PostMessageList(NetMessageVector& messageList) {
   if (bytes_wanna_write == 0)
     return;
 
-  buffer_to_be_sent_.reserve(buffer_to_be_sent_.size() + bytes_wanna_write);
+  buffer_to_be_sent_.reserve(bytes_wanna_write);
   filter_->Write(messages_to_be_sent_, buffer_to_be_sent_);
 
   messages_to_be_sent_.clear();
@@ -87,14 +88,14 @@ void TCPSession::Init(TCPSessionID id) {
   if (bytes_wanna_read == size_t(-1)) {
     socket_.async_read_some(boost::asio::buffer(&buffer_receiving_[0], 
                                                 buffer_receiving_.capacity()),
-                            boost::bind(&TCPSession::HandleRead, shared_from_this(),
+                            boost::bind(&TCPSession::HandleRead, this,
                                       _1,
                                       _2));
   } else {
     buffer_receiving_.resize(bytes_wanna_read);
     boost::asio::async_read(socket_,
                             boost::asio::buffer(&buffer_receiving_[0], bytes_wanna_read),
-                            boost::bind(&TCPSession::HandleRead, shared_from_this(),
+                            boost::bind(&TCPSession::HandleRead, this,
                                       _1,
                                       _2));
   }
@@ -129,98 +130,96 @@ void PackMessageList(boost::shared_ptr<TCPSession> session) {
 
 } // 
 
-void TCPSession::HandleRead(boost::weak_ptr<TCPSession> weak_session, 
-                            const boost::system::error_code& error,
+void TCPSession::HandleRead(const boost::system::error_code& error,
                             size_t bytes_transferred) {
-  if (weak_session.expired())
-    return;
-
-  boost::shared_ptr<TCPSession> session = weak_session.lock();
-
   if (error) {
-    session->Close();
+    if (error != boost::asio::error::operation_aborted) {
+      TCPSessionID id         = this->id_;
+      TCPSessionQueue& queue  = this->thread_.session_queue();
+      this->Close();
+      queue.Remove(id);
+    }
     return;
   }
 
-  bool wanna_post = session->messages_received_.empty();
+  bool wanna_post = this->messages_received_.empty();
 
-  session->buffer_receiving_.resize(bytes_transferred);
+  this->buffer_receiving_.resize(bytes_transferred);
 
-  size_t bytes_read = session->filter_->Read(session->messages_received_,
-                                             session->buffer_receiving_);
+  size_t bytes_read = this->filter_->Read(this->messages_received_,
+                                             this->buffer_receiving_);
   assert(bytes_read == bytes_transferred);
 
-  session->buffer_receiving_.clear();
+  this->buffer_receiving_.clear();
 
-  wanna_post = wanna_post && !session->messages_received_.empty();
+  wanna_post = wanna_post && !this->messages_received_.empty();
 
   if (wanna_post) {
-    session->thread_.PostCommandFromMe(session->thread_.id(),
-                                       boost::bind(&PackMessageList, session));
+    this->thread_.PostCommandFromMe(this->thread_.id(),
+                                       boost::bind(&PackMessageList, shared_from_this()));
   }
 
-  size_t bytes_wanna_read = session->filter_->BytesWannaRead();
+  size_t bytes_wanna_read = this->filter_->BytesWannaRead();
 
   if (bytes_wanna_read == 0)
     return;
 
   if (bytes_wanna_read == size_t(-1)) {
-    session->socket_.async_read_some(boost::asio::buffer(&session->buffer_receiving_[0], 
-                                                         session->buffer_receiving_.capacity()),
-                                     boost::bind(&TCPSession::HandleRead, weak_session,
+    this->socket_.async_read_some(boost::asio::buffer(&this->buffer_receiving_[0], 
+                                                         this->buffer_receiving_.capacity()),
+                                     boost::bind(&TCPSession::HandleRead, this,
                                                _1,
                                                _2));
   } else {
-    session->buffer_receiving_.resize(bytes_wanna_read);
-    boost::asio::async_read(session->socket_,
-                            boost::asio::buffer(&session->buffer_receiving_[0], bytes_wanna_read),
-                            boost::bind(&TCPSession::HandleRead, weak_session,
+    this->buffer_receiving_.resize(bytes_wanna_read);
+    boost::asio::async_read(this->socket_,
+                            boost::asio::buffer(&this->buffer_receiving_[0], bytes_wanna_read),
+                            boost::bind(&TCPSession::HandleRead, this,
                                       _1,
                                       _2));
   }
 }
 
-void TCPSession::HandleWrite(boost::weak_ptr<TCPSession> weak_session,
-                             const boost::system::error_code& error,
+void TCPSession::HandleWrite(const boost::system::error_code& error,
                              size_t bytes_transferred) {
-  if (weak_session.expired())
-    return;
-
-  boost::shared_ptr<TCPSession> session = weak_session.lock();
-
   if (error) {
-    session->Close();
+    if (error != boost::asio::error::operation_aborted) {
+      TCPSessionID id         = this->id_;
+      TCPSessionQueue& queue  = this->thread_.session_queue();
+      this->Close();
+      queue.Remove(id);
+    }
     return;
   }
 
-  session->buffer_sending_.clear();
+  this->buffer_sending_.clear();
 #if 0
-  if (session->id_ == kInvalidTCPSessionID) {
+  if (this->id_ == kInvalidTCPthisID) {
     return;
   }
 
-  assert(bytes_transferred == session->bytes_sending_);
+  assert(bytes_transferred == this->bytes_sending_);
 #endif
 
-  if (session->buffer_to_be_sent_.empty()) {
+  if (this->buffer_to_be_sent_.empty()) {
     size_t bytes_wanna_write 
-        = session->filter_->BytesWannaWrite(session->messages_to_be_sent_);
+        = this->filter_->BytesWannaWrite(this->messages_to_be_sent_);
 
     if (bytes_wanna_write == 0)
       return;
 
-    session->buffer_to_be_sent_.reserve(session->buffer_to_be_sent_.size() 
-                                        + bytes_wanna_write);
+    this->buffer_to_be_sent_.reserve(this->buffer_to_be_sent_.size() 
+                                     + bytes_wanna_write);
 
-    session->filter_->Write(session->messages_to_be_sent_, 
-                            session->buffer_to_be_sent_);
+    this->filter_->Write(this->messages_to_be_sent_, 
+                         this->buffer_to_be_sent_);
   }
 
-  session->buffer_sending_.swap(session->buffer_to_be_sent_);
-  boost::asio::async_write(session->socket_, 
-                           boost::asio::buffer(&session->buffer_sending_[0], 
-                                               session->buffer_sending_.size()),
-                           boost::bind(&TCPSession::HandleWrite, weak_session,
+  this->buffer_sending_.swap(this->buffer_to_be_sent_);
+  boost::asio::async_write(this->socket_, 
+                           boost::asio::buffer(&this->buffer_sending_[0], 
+                                               this->buffer_sending_.size()),
+                           boost::bind(&TCPSession::HandleWrite, this,
                                        _1,
                                        _2));
 }
@@ -229,14 +228,13 @@ void TCPSession::Close() {
   if (id_ == kInvalidTCPSessionID)
     return;
 
+  socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
   socket_.close();
-  thread_.session_queue().Remove(id_);
   thread_.PostCommandFromMe(TCPIOThreadManager::kMainThreadID, 
                             boost::bind(&TCPIOThreadManager::OnSessionClose,
                                         &thread_.manager(),
                                         id_));
   id_ = kInvalidTCPSessionID;
-  buffer_sending_.clear();
 }
 
 } // namespace
