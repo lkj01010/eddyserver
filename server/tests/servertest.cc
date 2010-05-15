@@ -50,11 +50,6 @@ class MyHandler : public TCPSessionHandler {
   }
 };
 
-static void f(const boost::system::error_code& error) {
-  cout << error.message() << endl;
-  cout << "f called" << endl;
-}
-
 int main(int argc, char** argv) {
   TCPIOThreadManager manager(0,   // thread num
                              boost::posix_time::millisec(10));  // sync interval
@@ -68,10 +63,6 @@ int main(int argc, char** argv) {
                    &MyHandler::Create,
                    &MyFilter::Create);
   boost::asio::deadline_timer timer(server.io_service());
-  timer.expires_from_now(boost::posix_time::seconds(1));
-  timer.async_wait(&f);
-  timer.async_wait(&f);
-  timer.cancel();
 
   manager.Run();
   return 0;

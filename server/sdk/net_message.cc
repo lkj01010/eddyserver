@@ -85,7 +85,7 @@ NetMessage& NetMessage::operator = (const NetMessage& other) {
   if (other.is_dynamic()) {
     this->dynamic_data_ = other.dynamic_data_;
   } else {
-    this->dynamic_data_->clear();
+    this->dynamic_data_.reset();
     this->static_size_ = other.static_size_;
     std::copy(other.static_data_, 
               other.static_data_ + other.static_size_, 
