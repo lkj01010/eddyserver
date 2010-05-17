@@ -228,7 +228,8 @@ void TCPSession::Close() {
   if (id_ == kInvalidTCPSessionID)
     return;
 
-  socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+  boost::system::error_code ec;
+  socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
   socket_.close();
   thread_.PostCommandFromMe(TCPIOThreadManager::kMainThreadID, 
                             boost::bind(&TCPIOThreadManager::OnSessionClose,
