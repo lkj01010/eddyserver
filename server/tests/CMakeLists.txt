@@ -13,3 +13,10 @@ target_link_libraries(refservertest eddy_sdk)
 add_executable(refclienttest refclienttest.cc)
 target_link_libraries(refclienttest eddy_sdk)
 
+add_custom_command(OUTPUT messagetest.pb.h messagetest.pb.cc
+	COMMAND protoc --cpp_out=./ messagetest.proto
+	DEPENDS messagetest.proto)
+
+add_executable(messagetest messagetest.cc messagetest.pb.cc)
+target_link_libraries(messagetest eddy_sdk protoc pthread)
+

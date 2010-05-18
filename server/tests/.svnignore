@@ -3,3 +3,4 @@ CMakeFiles.txt
 CMakeFiles
 Makefile
 cmake_install.cmake
+*.pb.*

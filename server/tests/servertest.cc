@@ -51,7 +51,7 @@ class MyHandler : public TCPSessionHandler {
 };
 
 int main(int argc, char** argv) {
-  TCPIOThreadManager manager(0,   // thread num
+  TCPIOThreadManager manager(3,   // thread num
                              boost::posix_time::millisec(10));  // sync interval
   unsigned short int port = 20000;
 
@@ -62,7 +62,6 @@ int main(int argc, char** argv) {
                    manager,
                    &MyHandler::Create,
                    &MyFilter::Create);
-  boost::asio::deadline_timer timer(server.io_service());
 
   manager.Run();
   return 0;

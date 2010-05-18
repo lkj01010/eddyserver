@@ -14,9 +14,9 @@
 // 
 // =====================================================================================
 
-#include    <boost/make_shared.hpp>
+#include    "sdk/net_message.h"
 
-#include    <sdk/net_message.h>
+#include    <boost/make_shared.hpp>
 
 namespace eddy {
 
