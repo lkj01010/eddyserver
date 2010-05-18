@@ -73,6 +73,9 @@ class TCPSession : public boost::enable_shared_from_this<TCPSession>,
       // handles write
       void HandleWrite(const boost::system::error_code& error,
                        size_t bytes_transferred);
+
+      // handles close
+      void HandleClose();
       // ====================  DATA MEMBERS  =======================================
       TCPSessionID                  id_;
       TCPIOThread&                  thread_;
@@ -83,6 +86,8 @@ class TCPSession : public boost::enable_shared_from_this<TCPSession>,
       std::vector<char>             buffer_to_be_sent_;
       std::vector<char>             buffer_sending_;
       std::vector<char>             buffer_receiving_;
+      int                           num_handlers_;
+      bool                          closed_;
     }; // -----  end of class TCPSession  -----
 
 }
