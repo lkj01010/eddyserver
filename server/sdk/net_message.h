@@ -56,6 +56,7 @@ class NetMessage {
   iterator          end();
   const_iterator    end() const;
   bool              empty() const;
+  void              clear();
   void              insert(iterator position, 
                            const_iterator first, 
                            const_iterator last);
@@ -159,6 +160,17 @@ inline NetMessage::const_iterator NetMessage::end() const {
 inline bool NetMessage::empty() const {
   return size() == 0;
 }
+
+
+inline void NetMessage::clear() {
+  if (this->is_dynamic()) {
+    dynamic_data_.reset();
+    static_size_ = 0;
+  } else {
+    static_size_ = 0;
+  }
+}
+
 
 }
 

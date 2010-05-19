@@ -58,7 +58,7 @@ public:
             pos_ += result;
         }
         if (result < n) {
-            container_.insert(container_.end(), s, s + n);
+            container_.insert(container_.end(), s + result, s + n);
             pos_ = container_.size();
         }
         return n;
