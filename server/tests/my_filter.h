@@ -94,7 +94,6 @@ class MyFilter : public eddy::NetMessageFilterInterface {
       message.Reserve(header_);
       message.Write(&buffer[0], buffer.size());
       header_read_ = false;
-      std::copy(message.begin(), message.end(), std::ostream_iterator<char>(std::cout, ""));
       return header_;
     }
   }

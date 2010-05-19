@@ -20,3 +20,12 @@ add_custom_command(OUTPUT messagetest.pb.h messagetest.pb.cc
 add_executable(messagetest messagetest.cc messagetest.pb.cc)
 target_link_libraries(messagetest eddy_sdk protoc pthread)
 
+add_custom_command(OUTPUT proto.pb.h proto.pb.cc
+	COMMAND protoc --cpp_out=./ proto.proto
+	DEPENDS proto.proto)
+
+add_executable(protoserver protoserver.cc proto.pb.cc)
+target_link_libraries(protoserver eddy_sdk protoc pthread)
+
+add_executable(protoclient protoclient.cc proto.pb.cc)
+target_link_libraries(protoclient eddy_sdk protoc pthread)

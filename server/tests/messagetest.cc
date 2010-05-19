@@ -40,11 +40,16 @@ int main() {
   NetMessage net_message;
   stream<NetMessageDevice>  io(net_message);
 
+  int a = 15;
+  io << a;
   message1.SerializeToOstream(&io);
-  io.flush();
-  io.seekg(0, std::ios_base::beg); // seek to the beginning
+  io.seekg(0, std::ios_base::beg);
+
+  int b = 0;
+  io >> b;
   message2.ParseFromIstream(&io);
 
-  cout << message2.DebugString() << endl;
+  assert(a == b);
+  assert(message1.DebugString() == message2.DebugString());
   return 0;
 }

@@ -163,12 +163,8 @@ inline bool NetMessage::empty() const {
 
 
 inline void NetMessage::clear() {
-  if (this->is_dynamic()) {
-    dynamic_data_.reset();
-    static_size_ = 0;
-  } else {
-    static_size_ = 0;
-  }
+  dynamic_data_.reset();
+  static_size_ = 0;
 }
 
 
