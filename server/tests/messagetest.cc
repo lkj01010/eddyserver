@@ -27,11 +27,11 @@
 int main() {
   using namespace std;
   using namespace eddy;
-  using namespace messagetest;
   using namespace boost::iostreams;
 
-  MessageA message1;
-  MessageA message2;
+  // from messagetest.proto
+  messagetest::MessageA message1;
+  messagetest::MessageA message2;
 
   message1.set_name("my message");
   message1.set_id(69);
