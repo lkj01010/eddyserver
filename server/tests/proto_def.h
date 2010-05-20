@@ -14,6 +14,9 @@
 // 
 // =====================================================================================
 
+#ifndef  PROTO_DEF_H_
+#define  PROTO_DEF_H_
+
 #include    "tests/proto.pb.h"
 
 #define DECLARE_MESSAGE(x) k##x##ID,
@@ -38,3 +41,5 @@ class GetMessageID {
     };
 #include    "tests/proto.h"
 #undef DECLARE_MESSAGE
+
+#endif   // ----- #ifndef PROTO_DEF_H_  -----
