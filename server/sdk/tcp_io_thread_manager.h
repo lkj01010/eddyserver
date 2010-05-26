@@ -47,15 +47,10 @@ class TCPIOThreadManager : public boost::noncopyable {
           SessionHandlerPointer>              SessionHandlerMap;
 
   // ====================  LIFECYCLE     =======================================
-  TCPIOThreadManager(size_t thread_num, 
-                     const boost::posix_time::time_duration& sync_interval);
+  TCPIOThreadManager(size_t thread_num);
   ~TCPIOThreadManager();
 
   // ====================  ACCESSORS     =======================================
-  const boost::posix_time::time_duration& sync_interval() const { 
-    return sync_interval_; 
-  }
-
   boost::asio::io_service& io_service() { 
     return threads_[kMainThreadID]->io_service(); 
   }
@@ -71,6 +66,11 @@ class TCPIOThreadManager : public boost::noncopyable {
     if (++next_thread_id_ >= threads_.size()) next_thread_id_ = 1;
     return *threads_[next_thread_id_];
   };
+  // Gets the main thread
+  TCPIOThread& GetMainThread() {
+    return *threads_[kMainThreadID];
+  }
+
   // Must be called in the main thread.
   // Adds the session to any thread, don't keep the pointer of session after 
   // this function called.
@@ -83,7 +83,6 @@ class TCPIOThreadManager : public boost::noncopyable {
  private:
   // ====================  DATA MEMBERS  =======================================
   typedef IDGenerator<TCPSessionID>       SessionIDGenerator;
-  const boost::posix_time::time_duration  sync_interval_;
   std::vector<ThreadPointer>              threads_;
   SessionHandlerMap                       session_handler_map_;
   SessionIDGenerator                      session_id_generator_;

@@ -55,12 +55,9 @@ class TCPIOThread : public boost::noncopyable {
   // ====================  MUTATORS      =======================================
 
   // ====================  OPERATIONS    =======================================
-  // The command will be buffered, posted to specific thread at next 
-  // manager().sync_interval() expired, executed in that thead, then discarded.
-  // Must call in this thread.
-  void PostCommandFromMe(TCPIOThreadID id, const boost::function<void ()>& command);
   // Posts command to this thread
-  void PostCommandToMe(const boost::function<void ()>& command);
+  template <typename Command>
+  void Post(Command command) { io_service_.post(command); }
   // runs in a new thread.
   void RunThread();
   // runs in current thread.
@@ -71,7 +68,6 @@ class TCPIOThread : public boost::noncopyable {
  private:
   friend class TCPIOThreadManager;
   // ====================  OPERATIONS    =======================================
-  void HandleSync();
   void HandleStop();
 
   // ====================  DATA MEMBERS  =======================================
@@ -79,12 +75,7 @@ class TCPIOThread : public boost::noncopyable {
   TCPIOThreadManager&               manager_;
   TCPSessionQueue                   session_queue_;
   boost::asio::io_service           io_service_;
-  CommandList                       commands_from_self_;
-  spinlock                          commands_from_other_lock_; 
-  CommandList                       commands_from_other_; 
-  std::map<int, CommandList>        command_lists_to_be_sent_;
   boost::shared_ptr<boost::thread>  thread_;
-  boost::asio::deadline_timer       sync_timer_;
 }; // -----  end of class TCPIOThread  -----
 
 }

@@ -26,11 +26,9 @@ namespace eddy {
 
 using namespace boost;
 
-TCPIOThreadManager::TCPIOThreadManager(size_t thread_num, 
-                                       const posix_time::time_duration& sync_interval)
-    : sync_interval_(sync_interval), 
-    session_id_generator_(kInvalidTCPSessionID + 1, 
-                          std::numeric_limits<SessionIDGenerator::IDType>::max()) {
+TCPIOThreadManager::TCPIOThreadManager(size_t thread_num)
+    : session_id_generator_(kInvalidTCPSessionID + 1, 
+                            std::numeric_limits<SessionIDGenerator::IDType>::max()) {
       threads_.reserve(thread_num + 1);
       for (size_t i = 0; i <= thread_num; ++i)
         threads_.push_back(ThreadPointer(new TCPIOThread(i, *this)));
@@ -41,18 +39,17 @@ TCPIOThreadManager::~TCPIOThreadManager() {
 }
 
 void TCPIOThreadManager::OnSessionConnect(SessionPointer session, 
-                                    SessionHandlerPointer handler) {
+                                          SessionHandlerPointer handler) {
   TCPSessionID session_id = *(session_id_generator_.Get());
-  handler->Init(session_id, session->thread().id(), *this);
+  handler->Init(session_id, session->thread().id(), this);
 
   if (!session_handler_map_.insert(
           std::make_pair(handler->session_id_, handler)).second)
     assert(false);
 
-  GetThread(kMainThreadID).PostCommandFromMe(session->thread().id(), 
-                                             bind(&TCPSession::Init,
-                                                  session,
-                                                  session_id));
+  session->thread().Post(bind(&TCPSession::Init,
+                              session,
+                              session_id));
   handler->OnConnect();
 }
 
@@ -69,8 +66,6 @@ TCPIOThreadManager::GetSessionHandler(TCPSessionID id) const {
 void TCPIOThreadManager::Stop() {
   if (threads_.empty())
     return;
-
-  threads_[kMainThreadID]->HandleSync();
 
   for (size_t i=0; i<threads_.size(); ++i) {
     if (i == kMainThreadID)
@@ -89,15 +84,14 @@ void TCPIOThreadManager::Stop() {
   }
 
   for(SessionHandlerMap::iterator it = session_handler_map_.begin();
-           it != session_handler_map_.end();
-           ++it) {
+      it != session_handler_map_.end();
+      ++it) {
     if (it->second != NULL)
       it->second->Dispose();
   }
 
   // ensure main thread exits last
   threads_[kMainThreadID]->Stop();
-  threads_[kMainThreadID]->HandleSync();
 }
 
 void TCPIOThreadManager::OnSessionClose(TCPSessionID id) {

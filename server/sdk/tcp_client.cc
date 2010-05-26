@@ -61,11 +61,11 @@ void TCPClient::HandleConnect(SessionPointer session,
     return;
   }
   
-  session->thread().PostCommandFromMe(TCPIOThreadManager::kMainThreadID,
-                                      boost::bind(&TCPIOThreadManager::OnSessionConnect,
-                                                boost::ref(session->thread().manager()),
-                                                session,
-                                                handler));
+  session->thread().manager().GetMainThread().Post(
+      boost::bind(&TCPIOThreadManager::OnSessionConnect,
+                  boost::ref(session->thread().manager()),
+                  session,
+                  handler));
 }
 
 }

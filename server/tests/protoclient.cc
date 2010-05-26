@@ -87,7 +87,7 @@ class MyHandler : public TCPSessionHandler {
 };
 
 int main(int argc, char** argv) {
-  TCPIOThreadManager manager(1, boost::posix_time::millisec(10));
+  TCPIOThreadManager manager(1);
 
   const char* port = "20000";
 

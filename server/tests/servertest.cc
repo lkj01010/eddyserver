@@ -36,6 +36,8 @@ class MyHandler : public TCPSessionHandler {
   }
   virtual void OnConnect() {
     cout << session_id() << ":connected" << endl;
+    SetReceiveDelay(posix_time::millisec(500));
+    SetSendDelay(posix_time::millisec(500));
   };
   virtual void OnMessage(NetMessage& message) {
 #if 0
@@ -44,6 +46,7 @@ class MyHandler : public TCPSessionHandler {
     cout << endl;
 #endif
     SendMessage(message);
+    Close();
   }
   virtual void OnClose() {
     cout << session_id() << ":closed" << endl;
@@ -51,8 +54,7 @@ class MyHandler : public TCPSessionHandler {
 };
 
 int main(int argc, char** argv) {
-  TCPIOThreadManager manager(3,   // thread num
-                             boost::posix_time::millisec(10));  // sync interval
+  TCPIOThreadManager manager(3);  // sync interval
   unsigned short int port = 20000;
 
   if (argc == 2)

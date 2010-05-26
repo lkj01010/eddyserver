@@ -20,6 +20,7 @@
 #include <string>
 
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
@@ -56,6 +57,9 @@ class TCPSession : public boost::enable_shared_from_this<TCPSession>,
       TCPIOThread& thread() { return thread_; }
       TCPSessionID id() const { return id_; }
       NetMessageVector& messages_received() { return messages_received_; }
+      void set_receive_delay(const boost::posix_time::time_duration& delay) {
+        receive_delay_ = delay;
+      }
 
       // ====================  MUTATORS      =======================================
 
@@ -76,18 +80,23 @@ class TCPSession : public boost::enable_shared_from_this<TCPSession>,
 
       // handles close
       void HandleClose();
+
+      // handles receive timer
+      void HandleReceiveTimer(const boost::system::error_code& error);
       // ====================  DATA MEMBERS  =======================================
-      TCPSessionID                  id_;
-      TCPIOThread&                  thread_;
-      boost::asio::ip::tcp::socket  socket_;
-      FilterPointer                 filter_;
-      NetMessageVector              messages_received_;
-      NetMessageVector              messages_to_be_sent_;
-      std::vector<char>             buffer_to_be_sent_;
-      std::vector<char>             buffer_sending_;
-      std::vector<char>             buffer_receiving_;
-      int                           num_handlers_;
-      bool                          closed_;
+      TCPSessionID                      id_;
+      TCPIOThread&                      thread_;
+      boost::asio::ip::tcp::socket      socket_;
+      FilterPointer                     filter_;
+      NetMessageVector                  messages_received_;
+      NetMessageVector                  messages_to_be_sent_;
+      std::vector<char>                 buffer_to_be_sent_;
+      std::vector<char>                 buffer_sending_;
+      std::vector<char>                 buffer_receiving_;
+      int                               num_handlers_;
+      bool                              closed_;
+      boost::posix_time::time_duration  receive_delay_;
+      boost::asio::deadline_timer       receive_delay_timer_;
     }; // -----  end of class TCPSession  -----
 
 }

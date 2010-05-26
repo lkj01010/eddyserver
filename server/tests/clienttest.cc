@@ -73,8 +73,6 @@ class MyHandler : public TCPSessionHandler {
          ostream_iterator<char>(cout, ""));
     message = ::message;
 
-    message.Write("xx\n", 3);
-
     SendMessage(message);
   }
 
@@ -88,7 +86,7 @@ class MyHandler : public TCPSessionHandler {
 int main(int argc, char** argv) {
   message.Reserve(sizeof(kLongMessage));
   message.Write(kLongMessage, sizeof(kLongMessage));
-  TCPIOThreadManager manager(5, boost::posix_time::millisec(10));
+  TCPIOThreadManager manager(5);
 
   list<shared_ptr<TCPClient> > list;
 
@@ -97,7 +95,7 @@ int main(int argc, char** argv) {
   if (argc == 2)
     port = argv[1];
 
-  for (size_t i=0; i<1000; ++i) {
+  for (size_t i=0; i<1; ++i) {
     shared_ptr<TCPClient> p(new TCPClient(asio::ip::tcp::resolver_query("127.0.0.1", port),
                                           manager,
                                           &MyHandler::Create,

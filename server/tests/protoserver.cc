@@ -112,8 +112,7 @@ class MyHandler : public TCPSessionHandler {
 
 
 int main(int argc, char** argv) {
-  TCPIOThreadManager manager(3,   // thread num
-                             boost::posix_time::millisec(10));  // sync interval
+  TCPIOThreadManager manager(3);  // sync interval
   unsigned short int port = 20000;
 
   if (argc == 2)
