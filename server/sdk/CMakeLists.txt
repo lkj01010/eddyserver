@@ -12,7 +12,8 @@ message("eddy sdk linking ..." ${BOOST_DEBUG_LIB})
 target_link_libraries(eddy_sdk ${BOOST_DEBUG_LIB})
 endif(CMAKE_BUILD_TYPE STREQUAL "Release")
 
-target_link_libraries(eddy_sdk tcmalloc)
+if(linux)
+target_lik_libraries(eddy_sdk tcmalloc)
+endif(linux)
 
 message("------------------------------------------")
-
