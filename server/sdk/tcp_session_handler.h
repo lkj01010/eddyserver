@@ -24,7 +24,6 @@
 
 #include    "sdk/tcp_defs.h"
 #include    "sdk/net_message.h"
-#include    "sdk/spinlock.h"
 
 namespace eddy { 
 

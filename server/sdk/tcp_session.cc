@@ -155,14 +155,9 @@ void TCPSession::HandleRead(const boost::system::error_code& error,
   -- num_handlers_;
   assert(num_handlers_ >= 0);
 
-  if (error) {
-    if (closed_) {
-      if (num_handlers_ == 0)
-        HandleClose();
-      // else do nothing
-    } else {
-      Close();
-    }
+  if (error || closed_) {
+    closed_ = true;
+    HandleClose();
     return;
   }
 
@@ -218,13 +213,8 @@ void TCPSession::HandleWrite(const boost::system::error_code& error,
   assert(num_handlers_ >= 0);
 
   if (error) {
-    if (closed_) {
-      if (num_handlers_ == 0)
-        HandleClose();
-      // else do nothing
-    } else {
-      Close();
-    }
+    closed_ = true;
+    HandleClose();
     return;
   }
 
@@ -234,9 +224,8 @@ void TCPSession::HandleWrite(const boost::system::error_code& error,
     size_t bytes_wanna_write 
         = this->filter_->BytesWannaWrite(this->messages_to_be_sent_);
 
-    if (bytes_wanna_write == 0) {
-      if (closed_ && num_handlers_ == 0)
-        HandleClose();
+    if (bytes_wanna_write == 0 && closed_) {
+      HandleClose();
       return;
     }
 
@@ -258,19 +247,26 @@ void TCPSession::HandleWrite(const boost::system::error_code& error,
 }
 
 void TCPSession::HandleClose() {
+  if (num_handlers_ > 0)
+    return;
+
   TCPIOThread& main_thread = thread_.manager().GetMainThread();
 
   main_thread.Post(boost::bind(&TCPIOThreadManager::OnSessionClose,
                                &thread_.manager(),
                                id_));
 
-#if 0
   boost::system::error_code ec;
   socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
 
-  if (ec)
+  if (ec && ec != boost::asio::error::not_connected) {
     std::cerr << ec.message() << std::endl;
-#endif
+  }
+
+  receive_delay_timer_.cancel();
+  PackMessageList(shared_from_this());
+
+  socket_.close();
 
   thread_.session_queue().Remove(id_);
 }
@@ -281,13 +277,7 @@ void TCPSession::Close() {
 
   closed_ = true;
 
-  receive_delay_timer_.cancel();
-  PackMessageList(shared_from_this());
-
-  socket_.close();
-
-  if (num_handlers_ == 0)
-    HandleClose();
+  HandleClose();
 }
 
 } // namespace

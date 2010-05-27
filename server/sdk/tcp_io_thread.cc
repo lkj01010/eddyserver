@@ -31,7 +31,7 @@ using namespace std;
 using namespace boost;
 
 TCPIOThread::TCPIOThread(TCPIOThreadID id, TCPIOThreadManager& manager) 
-    : id_(id), manager_(manager) {
+    : id_(id), manager_(manager), work_(NULL) {
     }
 
 void TCPIOThread::RunThread() {
@@ -42,7 +42,9 @@ void TCPIOThread::RunThread() {
 }
 
 void TCPIOThread::Run() {
-  boost::asio::io_service::work work(io_service_);
+  if (work_ == NULL)
+    work_ = new boost::asio::io_service::work(io_service_);
+
   boost::system::error_code error;
   io_service_.run(error);
 
@@ -56,12 +58,12 @@ void TCPIOThread::Join() {
 }
 
 void TCPIOThread::Stop() {
-  Post(bind(&TCPIOThread::HandleStop, this));
-}
+  if (work_ != NULL) {
+    delete work_;
+    work_ = NULL;
+  }
 
-void TCPIOThread::HandleStop() {
-  session_queue_.Clear();
-  io_service_.stop();
+  session_queue_.CloseAllSession();
 }
 
 }

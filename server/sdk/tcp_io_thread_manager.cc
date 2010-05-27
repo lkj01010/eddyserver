@@ -67,14 +67,6 @@ void TCPIOThreadManager::Stop() {
   if (threads_.empty())
     return;
 
-  for(SessionHandlerMap::iterator it = session_handler_map_.begin();
-      it != session_handler_map_.end();
-      ++it) {
-    if (it->second != NULL)
-      it->second->Close();
-      it->second->Dispose();
-  }
-
   for (size_t i=0; i<threads_.size(); ++i) {
     if (i == kMainThreadID)
       continue;

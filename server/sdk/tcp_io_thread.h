@@ -27,7 +27,6 @@
 
 #include    "sdk/tcp_defs.h"
 #include    "sdk/tcp_session_queue.h"
-#include    "sdk/spinlock.h"
 
 namespace eddy {
 
@@ -76,6 +75,7 @@ class TCPIOThread : public boost::noncopyable {
   TCPSessionQueue                   session_queue_;
   boost::asio::io_service           io_service_;
   boost::shared_ptr<boost::thread>  thread_;
+  boost::asio::io_service::work*    work_;
 }; // -----  end of class TCPIOThread  -----
 
 }

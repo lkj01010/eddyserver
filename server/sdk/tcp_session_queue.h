@@ -45,6 +45,7 @@ class TCPSessionQueue {
   void Remove(SessionPointer session);
   void Remove(TCPSessionID id);
   void Clear();
+  void CloseAllSession();
   SessionPointer Get(TCPSessionID id);
 
  private:

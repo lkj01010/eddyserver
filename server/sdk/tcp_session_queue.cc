@@ -52,4 +52,11 @@ void TCPSessionQueue::Clear() {
   map_.clear();
 }
 
+void TCPSessionQueue::CloseAllSession() {
+  for (SessionMap::iterator it = map_.begin();
+       it != map_.end(); ++it) {
+    it->second->Close();
+  }
+}
+
 } // end of namespace
