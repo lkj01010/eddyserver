@@ -15,3 +15,4 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Release")
 target_link_libraries(eddy_sdk tcmalloc)
 
 message("------------------------------------------")
+
