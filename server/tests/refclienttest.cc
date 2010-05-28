@@ -83,11 +83,11 @@ int main(int argc, char* argv[])
     boost::asio::io_service io_service;
 
     tcp::resolver resolver(io_service);
-    tcp::resolver::query query(tcp::v4(), "localhost", "20000");
+    tcp::resolver::query query(tcp::v4(), "127.0.0.1", "20000");
     tcp::resolver::iterator iterator = resolver.resolve(query);
 
     list<boost::shared_ptr<Session> > list;
-    for (size_t i = 0; i<10000; ++i)
+    for (size_t i = 0; i<1000; ++i)
     {
       list.push_back(boost::shared_ptr<Session>(new Session(io_service, *iterator)));
     }
