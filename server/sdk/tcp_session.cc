@@ -224,8 +224,9 @@ void TCPSession::HandleWrite(const boost::system::error_code& error,
     size_t bytes_wanna_write 
         = this->filter_->BytesWannaWrite(this->messages_to_be_sent_);
 
-    if (bytes_wanna_write == 0 && closed_) {
-      HandleClose();
+    if (bytes_wanna_write == 0 ) {
+	  if (closed_)
+        HandleClose();
       return;
     }
 

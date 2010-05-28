@@ -27,17 +27,21 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 #build type
-if(NOT CMAKE_BUILD_TYPE)
+if (NOT CMAKE_BUILD_TYPE)
 	message("build type not set")
 	set(CMAKE_BUILD_TYPE "Debug")
-endif(NOT CMAKE_BUILD_TYPE)
+endif (NOT CMAKE_BUILD_TYPE)
 message("build type ... " ${CMAKE_BUILD_TYPE})
 
 #default shared
 set(BUILD_SHARED_LIBS true)
 
 #compile options
-if(CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_COMPILER_IS_GNUCXX)
+	check_cxx_compiler_flag(-msse EDDY_GCC_HAS_SSE)
+	if (EDDY_GCC_HAS_SSE)
+		add_definitions(-msse)
+	endif ()
 	set(EDDY_FLAGS_COMMON "-Wall -Werror -Wno-deprecated")
 	set(EDDY_FLAGS_DEBUG "${EDDY_FLAGS_COMMON} -O0 -ggdb -rdynamic")
 	set(EDDY_FLAGS_RELWITHDEBINFO "${EDDY_FLAGS_COMMON} -O3 -ggdb -rdynamic")
@@ -48,7 +52,18 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 	set(CMAKE_C_FLAGS_RELWITHDEBINFO ${EDDY_FLAGS_RELWITHDEBINFO})
 	set(CMAKE_CXX_FLAGS_RELEASE ${EDDY_FLAGS_RELEASE})
 	set(CMAKE_C_FLAGS_RELEASE ${EDDY_FLAGS_RELEASE})
-endif(CMAKE_COMPILER_IS_GNUCXX)
+endif (CMAKE_COMPILER_IS_GNUCXX)
+if (MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast")
+  # Enable intrinsics on MSVC in debug mode
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Oi")
+  if (CMAKE_CL_64)
+    # Visual Studio bails out on debug builds in 64bit mode unless
+	# this flag is set...
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /bigobj")
+  endif (CMAKE_CL_64)
+endif (MSVC)
 
 #eddy sdk
 include_directories(.)

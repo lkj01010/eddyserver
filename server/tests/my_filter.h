@@ -17,7 +17,6 @@
 #ifndef  MY_FILTER_H_
 #define  MY_FILTER_H_
 
-#include    <stdint.h>
 #include    <numeric>
 #include    <iostream>
 
@@ -29,7 +28,7 @@
 
 class MyFilter : public eddy::NetMessageFilterInterface {
  public:
-  typedef uint16_t Header;
+	 typedef boost::uint16_t Header;
   static const size_t kHeaderSize = sizeof(Header);
 
   MyFilter() {
