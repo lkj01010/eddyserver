@@ -38,7 +38,7 @@ set(BUILD_SHARED_LIBS true)
 
 #compile options
 if (CMAKE_COMPILER_IS_GNUCXX)
-	check_cxx_compiler_flag(-msse EDDY_GCC_HAS_SSE)
+	#check_cxx_compiler_flag(-msse EDDY_GCC_HAS_SSE)
 	if (EDDY_GCC_HAS_SSE)
 		add_definitions(-msse)
 	endif ()

@@ -78,7 +78,7 @@ class MyHandler : public TCPSessionHandler {
     io << id;
     message.SerializeToOstream(&io);
     io.flush();
-    SendMessage(net_message);
+    Send(net_message);
   }
 
   virtual void OnClose() {

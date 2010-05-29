@@ -23,6 +23,7 @@
 #include    "sdk/tcp_server.h"
 #include    "sdk/tcp_session_handler.h"
 #include    "sdk/net_message_filter_interface.h"
+#include    "sdk/timer.h"
 #include    "tests/my_filter.h"
 
 using namespace eddy;
@@ -45,7 +46,7 @@ class MyHandler : public TCPSessionHandler {
               ostream_iterator<char>(cout, ""));
     cout << endl;
 #endif
-    SendMessage(message);
+    Send(message);
     Close();
   }
   virtual void OnClose() {
@@ -60,7 +61,7 @@ int main(int argc, char** argv) {
   if (argc == 2)
     port = boost::lexical_cast<unsigned short int>(argv[1]);
 
-  TCPServer server(boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port),
+  TCPServer server(asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port),
                    manager,
                    &MyHandler::Create,
                    &MyFilter::Create);

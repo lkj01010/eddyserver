@@ -51,9 +51,10 @@ class TCPSessionHandler : public boost::enable_shared_from_this<TCPSessionHandle
 
       // ====================  OPERATIONS    =======================================
       // sends message to remote endpoint, the content of message would be consumed
-      void SendMessage(NetMessage& message);
+      void Send(NetMessage& message);
 
-      // closes the session
+      // closes the session, the underlying TCPSession will wait until all data
+      // in write-buffer has been sent, then notify this->OnClose().
       void Close();
 
       // true if the session is closed

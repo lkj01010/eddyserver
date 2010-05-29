@@ -62,7 +62,7 @@ class MyHandler : public TCPSessionHandler {
 
   virtual void OnConnect() {
     cout << "connected" << endl;
-    SendMessage(message);
+    Send(message);
   }
 
   virtual void OnMessage(NetMessage& message) {
@@ -73,7 +73,7 @@ class MyHandler : public TCPSessionHandler {
          ostream_iterator<char>(cout, ""));
     message = ::message;
 
-    SendMessage(message);
+    Send(message);
   }
 
   virtual void OnClose() {

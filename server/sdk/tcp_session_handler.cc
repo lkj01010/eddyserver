@@ -83,7 +83,7 @@ void TCPSessionHandler::HandleSendTimer(const boost::system::error_code& error) 
   PackMessageList(shared_from_this(), main_thread, session_thread, session_id_);
 }
 
-void TCPSessionHandler::SendMessage(NetMessage& message) {
+void TCPSessionHandler::Send(NetMessage& message) {
   if (IsClosed())
     return;
 

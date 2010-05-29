@@ -98,13 +98,12 @@ void TCPIOThreadManager::OnSessionClose(TCPSessionID id) {
 
   if (handler != NULL) {
     handler->OnClose();
+    handler->Dispose();
     session_handler_map_.erase(it);
   } else {
     session_handler_map_.erase(it);
-    return;
   }
 
-  handler->Dispose();
   session_id_generator_.Put(id);
 }
 
