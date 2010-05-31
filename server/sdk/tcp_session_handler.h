@@ -48,6 +48,7 @@ class TCPSessionHandler : public boost::enable_shared_from_this<TCPSessionHandle
       TCPSessionID session_id() const { return session_id_; }
       TCPIOThreadID session_thread_id() const { return session_thread_id_; }
       NetMessageVector& messages_to_be_sent() { return messages_to_be_sent_; }
+      TCPIOThreadManager* io_thread_manager() { return io_thread_manager_; }
 
       // ====================  OPERATIONS    =======================================
       // sends message to remote endpoint, the content of message would be consumed

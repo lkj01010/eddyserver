@@ -42,31 +42,44 @@ TCPSessionHandler::~TCPSessionHandler() {
 namespace {
 void SendMessageListToSession(TCPIOThread& session_thread,
                               TCPSessionID session_id,
-                              NetMessageVector* messageList) {
+                              NetMessageVector* messages) {
   boost::shared_ptr<TCPSession> session 
       = session_thread.session_queue().Get(session_id); 
 
   if (session == NULL)
     return;
 
-  session->PostMessageList(*messageList);
-  delete messageList;
+  session->PostMessageList(*messages);
+  delete messages;
 }
 
-void PackMessageList(boost::shared_ptr<TCPSessionHandler> handler,
-                     TCPIOThread& handler_thread,
-                     TCPIOThread& session_thread,
-                     TCPSessionID session_id) {
+void PackMessageList(boost::shared_ptr<TCPSessionHandler> handler) {
   if (handler->messages_to_be_sent().empty())
     return;
 
-  NetMessageVector* messageList(new NetMessageVector);
-  messageList->swap(handler->messages_to_be_sent());
-  handler->messages_to_be_sent().reserve(messageList->capacity());
+  NetMessageVector* messages(new NetMessageVector);
+  messages->swap(handler->messages_to_be_sent());
+  handler->messages_to_be_sent().reserve(messages->capacity());
+
+  TCPIOThread& session_thread = handler->io_thread_manager()
+      ->GetThread(handler->session_thread_id());
+
   session_thread.Post(boost::bind(&SendMessageListToSession,
                                   boost::ref(session_thread),
-                                  session_id,
-                                  messageList));
+                                  handler->session_id(),
+                                  messages));
+}
+
+// single threaded
+void SendMessageListDirectly(boost::shared_ptr<TCPSessionHandler> handler) {
+  boost::shared_ptr<TCPSession> session = 
+      handler->io_thread_manager()->GetMainThread().session_queue().Get(handler->session_id());
+
+  if (session == NULL)
+    return;
+
+  session->PostMessageList(handler->messages_to_be_sent());
+  handler->messages_to_be_sent().clear();
 }
 
 } // 
@@ -75,12 +88,10 @@ void TCPSessionHandler::HandleSendTimer(const boost::system::error_code& error) 
   if (error)
     return;
 
-  TCPIOThread& main_thread = io_thread_manager_
-      ->GetMainThread();
-  TCPIOThread& session_thread = io_thread_manager_
-      ->GetThread(session_thread_id_);
-
-  PackMessageList(shared_from_this(), main_thread, session_thread, session_id_);
+  if (session_thread_id_ == TCPIOThreadManager::kMainThreadID)
+    SendMessageListDirectly(shared_from_this());
+  else
+    PackMessageList(shared_from_this());
 }
 
 void TCPSessionHandler::Send(NetMessage& message) {
@@ -93,22 +104,20 @@ void TCPSessionHandler::Send(NetMessage& message) {
   bool wanna_send = messages_to_be_sent_.empty();
   messages_to_be_sent_.push_back(message);
 
+
   if (wanna_send) {
     if (send_delay_.is_not_a_date_time()) {
-      TCPIOThread& main_thread = io_thread_manager_
-          ->GetMainThread();
-      TCPIOThread& session_thread = io_thread_manager_
-          ->GetThread(session_thread_id_);
-
-      main_thread.Post(boost::bind(&PackMessageList, 
-                                   shared_from_this(),
-                                   boost::ref(main_thread),
-                                   boost::ref(session_thread),
-                                   session_id_));
+      if (session_id_ == TCPIOThreadManager::kMainThreadID) {
+        io_thread_manager_->GetMainThread().Post(boost::bind(&SendMessageListDirectly, 
+                                     shared_from_this()));
+      } else {
+        io_thread_manager_->GetMainThread().Post(boost::bind(&PackMessageList, 
+                                     shared_from_this()));
+      }
     } else {
       send_delay_timer_->expires_from_now(send_delay_);
-      send_delay_timer_->async_wait(boost::bind(&TCPSessionHandler::HandleSendTimer, 
-                                               this, _1));
+      send_delay_timer_->async_wait(boost::bind(&TCPSessionHandler::HandleSendTimer,
+                                                this, _1));
     }
   }
 }
@@ -143,9 +152,7 @@ void TCPSessionHandler::Close() {
 
   TCPIOThread& session_thread = io_thread_manager_->GetThread(session_thread_id_);
 
-  TCPIOThread& main_thread = io_thread_manager_->GetMainThread();
-
-  PackMessageList(shared_from_this(), main_thread, session_thread, session_id_);
+  PackMessageList(shared_from_this());
 
   session_thread.Post(boost::bind(&CloseSession, 
                                   boost::ref(session_thread), 

@@ -115,30 +115,45 @@ namespace {
 
 void SendMessageListToHandler(TCPIOThreadManager& manager,
                               TCPSessionID id,
-                              NetMessageVector* messageList) {
-  boost::shared_ptr<TCPSessionHandler> sessionHandler = manager.GetSessionHandler(id);
+                              NetMessageVector* messages) {
+  boost::shared_ptr<TCPSessionHandler> handler = manager.GetSessionHandler(id);
 
-  if (sessionHandler == NULL)
+  if (handler == NULL)
     return;
 
-  for_each(messageList->begin(), messageList->end(),
+  for_each(messages->begin(), messages->end(),
            boost::bind(&TCPSessionHandler::OnMessage, 
-                       sessionHandler, _1));
+                       handler, _1));
 
-  delete messageList;
+  delete messages;
 }
 
 void PackMessageList(boost::shared_ptr<TCPSession> session) {
   if (session->messages_received().empty())
     return;
 
-  NetMessageVector* messageList(new NetMessageVector);
-  messageList->swap(session->messages_received());
+  NetMessageVector* messages(new NetMessageVector);
+  messages->swap(session->messages_received());
   session->thread().manager().GetMainThread().Post(
       boost::bind(&SendMessageListToHandler,
                   boost::ref(session->thread().manager()),
                   session->id(),
-                  messageList));
+                  messages));
+}
+
+void SendMessageListDirectly(boost::shared_ptr<TCPSession> session) {
+  boost::shared_ptr<TCPSessionHandler> handler = 
+      session->thread().manager().GetSessionHandler(session->id());
+
+  if (handler == NULL)
+    return;
+
+  for_each(session->messages_received().begin(), 
+           session->messages_received().end(),
+           boost::bind(&TCPSessionHandler::OnMessage, 
+                       handler, _1));
+
+  session->messages_received().clear();
 }
 
 } // 
@@ -147,7 +162,10 @@ void TCPSession::HandleReceiveTimer(const boost::system::error_code& error) {
   if (error)
     return;
 
-  PackMessageList(shared_from_this());
+  if (thread_.id() == TCPIOThreadManager::kMainThreadID)
+    SendMessageListDirectly(shared_from_this());
+  else
+    PackMessageList(shared_from_this());
 }
 
 void TCPSession::HandleRead(const boost::system::error_code& error,
@@ -175,7 +193,10 @@ void TCPSession::HandleRead(const boost::system::error_code& error,
 
   if (wanna_post) {
     if (receive_delay_.is_not_a_date_time()) {
-      thread_.Post(boost::bind(&PackMessageList, shared_from_this()));
+      if (thread_.id() == TCPIOThreadManager::kMainThreadID) 
+        thread_.Post(boost::bind(&SendMessageListDirectly, shared_from_this()));
+      else
+        thread_.Post(boost::bind(&PackMessageList, shared_from_this()));
     } else {
       receive_delay_timer_.expires_from_now(receive_delay_);
       receive_delay_timer_.async_wait(boost::bind(&TCPSession::HandleReceiveTimer,

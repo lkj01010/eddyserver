@@ -69,8 +69,10 @@ class MyHandler : public TCPSessionHandler {
     ptime new_time = microsec_clock::local_time();
     cout << new_time - time << endl;
     time = new_time;
+#if 0
     copy(message.begin(), message.end(),
          ostream_iterator<char>(cout, ""));
+#endif
     message = ::message;
 
     Send(message);
@@ -86,7 +88,7 @@ class MyHandler : public TCPSessionHandler {
 int main(int argc, char** argv) {
   message.Reserve(sizeof(kLongMessage));
   message.Write(kLongMessage, sizeof(kLongMessage));
-  TCPIOThreadManager manager(5);
+  TCPIOThreadManager manager(0);
 
   list<shared_ptr<TCPClient> > list;
 
@@ -95,7 +97,7 @@ int main(int argc, char** argv) {
   if (argc == 2)
     port = argv[1];
 
-  for (size_t i=0; i<1; ++i) {
+  for (size_t i=0; i<3000; ++i) {
     shared_ptr<TCPClient> p(new TCPClient(asio::ip::tcp::resolver_query("127.0.0.1", port),
                                           manager,
                                           &MyHandler::Create,

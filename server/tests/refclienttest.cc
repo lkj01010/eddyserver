@@ -5,7 +5,7 @@
 //    Description:  ref
 // 
 //        Version:  1.0
-//        Created:  2009-12-11 17:40:42
+//        Created:  200sizeof(kLongMessage)-12-11 17:40:42
 //       Revision:  none
 //       Compiler:  g++
 // 
@@ -51,28 +51,27 @@ class Session {
  public:
   Session(io_service& io_service, const tcp::endpoint& endpoint) :
   socket_(io_service) {
-    buffer_[9] = '\0';
+    buffer_[sizeof(kLongMessage - 1)] = '\0';
     socket_.connect(endpoint);
-    async_write(socket_, buffer(kLongMessage, 9),
+    async_write(socket_, buffer(kLongMessage, sizeof(kLongMessage)),
                         boost::bind(&Session::HandleWrite, this));
-    async_read(socket_, buffer(buffer_, 9), boost::bind(&Session::HandleRead, this));
+    async_read(socket_, buffer(buffer_, sizeof(kLongMessage)), boost::bind(&Session::HandleRead, this));
   }
 
  private:
   void HandleWrite() {
   }
   void HandleRead() {
-    async_write(socket_, buffer(kLongMessage, 9),
+    async_write(socket_, buffer(kLongMessage, sizeof(kLongMessage)),
                         boost::bind(&Session::HandleWrite, this));
-    async_read(socket_, buffer(buffer_, 9), boost::bind(&Session::HandleRead, this));
-    cout << buffer_ << endl;
+    async_read(socket_, buffer(buffer_, sizeof(kLongMessage)), boost::bind(&Session::HandleRead, this));
     ptime new_time = microsec_clock::local_time();
     cout << new_time - time << endl;
     time = new_time;
   }
 
   tcp::socket socket_;
-  char buffer_[10];
+  char buffer_[sizeof(kLongMessage)];
   ptime time;
 };
 
@@ -87,7 +86,7 @@ int main(int argc, char* argv[])
     tcp::resolver::iterator iterator = resolver.resolve(query);
 
     list<boost::shared_ptr<Session> > list;
-    for (size_t i = 0; i<1000; ++i)
+    for (size_t i = 0; i<3000; ++i)
     {
       list.push_back(boost::shared_ptr<Session>(new Session(io_service, *iterator)));
     }
