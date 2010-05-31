@@ -91,7 +91,7 @@ public:
 private:
     typedef typename Container::size_type   size_type;
     Container&  container_;
-    size_type   pos_;
+    stream_offset   pos_;
 };
 
 } // End namespace eddy
