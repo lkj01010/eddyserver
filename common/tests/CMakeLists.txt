@@ -20,7 +20,7 @@ add_custom_command(OUTPUT messagetest.pb.h messagetest.pb.cc
 	DEPENDS messagetest.proto)
 
 add_executable(messagetest messagetest.cc messagetest.pb.cc)
-target_link_libraries(messagetest ${EDDYSDK} protoc protobuf)
+target_link_libraries(messagetest ${EDDYSDK} ${Protoc_LIBRARIES} ${Protobuf_LIBRARIES})
 if (linux)
 target_link_libraries(messagetest pthread)
 endif (linux)
@@ -30,13 +30,13 @@ add_custom_command(OUTPUT proto.pb.h proto.pb.cc
 	DEPENDS proto.proto)
 
 add_executable(protoserver protoserver.cc proto.pb.cc)
-target_link_libraries(protoserver ${EDDYSDK} protoc protobuf)
+target_link_libraries(protoserver ${EDDYSDK} ${Protoc_LIBRARIES} ${Protobuf_LIBRARIES})
 if (linux)
 target_link_libraries(protoserver pthread)
 endif (linux)
 
 add_executable(protoclient protoclient.cc proto.pb.cc)
-target_link_libraries(protoclient ${EDDYSDK} protoc protobuf)
+target_link_libraries(protoclient ${EDDYSDK} ${Protoc_LIBRARIES} ${Protobuf_LIBRARIES})
 if (linux)
 target_link_libraries(protoclient pthread)
 endif (linux)
