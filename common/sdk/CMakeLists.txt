@@ -8,6 +8,7 @@ if (UNIX)
 endif(UNIX)
 
 if (UNIX)
+	target_link_libraries(eddy_sdk pthread)
 	target_link_libraries(eddy_sdk tcmalloc)
 endif (UNIX)
 
