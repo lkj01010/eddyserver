@@ -39,16 +39,14 @@ if (NOT Boost_FOUND)
 	set(Boost_USE_STATIC_LIBS NOT ${Boost_USE_STATIC_LIBS})
 	find_package(Boost COMPONENTS ${EDDY_BOOST_COMPONENTS} QUIET)
 endif()
-macro_log_feature(Boost_SYSTEM_FOUND "boost" "Boost (general)" "http://boost.org" FALSE "" "")
 macro_log_feature(Boost_THREAD_FOUND "boost-thread" "Used for threading support" "http://boost.org" FALSE "" "")
 macro_log_feature(Boost_DATE_TIME_FOUND "boost-date_time" "Used for threading support" "http://boost.org" FALSE "" "")
 endif (UNIX)
 
 find_package(Boost)
-# Optional Boost libs (Boost_${COMPONENT}_FOUND
 macro_log_feature(Boost_FOUND "boost" "Boost (general)" "http://boost.org" FALSE "" "")
 
-find_package(Protobuf)
+find_package(Protobuf REQUIRED)
   
 # Display results, terminate if anything required is missing
 MACRO_DISPLAY_FEATURE_LOG()
