@@ -81,9 +81,23 @@ if (MSVC)
   endif (CMAKE_CL_64)
 endif (MSVC)
 
-#eddy sdk
-include_directories(common)
+#options
+option(EDDY_BUILD_COMMON "Build common libs" TRUE)
+option(EDDY_BUILD_CLIENT "Build client" TRUE)
+
+#path
+set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/depencencies/include)
+set(CMAKE_LIBRARY_PATH ${CMAKE_INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/depencencies/lib)
+
 #supress relative path warning
 cmake_policy(SET CMP0015 NEW)
 link_directories(lib)
-add_subdirectory(common)
+
+if (EDDY_BUILD_COMMON)
+	include_directories(common)
+	add_subdirectory(common)
+endif (EDDY_BUILD_COMMON)
+
+if (EDDY_BUILD_CLIENT)
+	add_subdirectory(client)
+endif (EDDY_BUILD_CLIENT)

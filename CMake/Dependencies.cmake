@@ -27,6 +27,7 @@ set(CMAKE_FRAMEWORK_PATH ${EDDY_DEP_SEARCH_PATH} ${CMAKE_FRAMEWORK_PATH})
 #######################################################################
 # Core dependencies
 #######################################################################
+#boost
 set(Boost_USE_STATIC_LIBS TRUE)
 set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0")
 
@@ -43,25 +44,40 @@ macro_log_feature(Boost_THREAD_FOUND "boost-thread" "Used for threading support"
 macro_log_feature(Boost_DATE_TIME_FOUND "boost-date_time" "Used for threading support" "http://boost.org" FALSE "" "")
 endif (UNIX)
 
-find_package(Boost)
+find_package(Boost REQUIRED)
 macro_log_feature(Boost_FOUND "boost" "Boost (general)" "http://boost.org" FALSE "" "")
 
 find_package(Protobuf REQUIRED)
-  
+macro_log_feature(PROTOBUF_FOUND "protobuf" "Protobuf (general)" "http://code.google.com/p/protobuf/" FALSE "" "")
+
+if (EDDY_BUILD_CLIENT)
+find_package(OGRE REQUIRED)
+macro_log_feature(OGRE_FOUND "OGRE" "OGRE (general)" "http://www.ogre3d.org/" FALSE "" "") 
+
+find_package(OIS REQUIRED)
+macro_log_feature(OIS_FOUND "OIS" "Input library needed for the samples" "http://sourceforge.net/projects/wgois" FALSE "" "") 
+endif (EDDY_BUILD_CLIENT)
+
 # Display results, terminate if anything required is missing
 MACRO_DISPLAY_FEATURE_LOG()
 
 # Add library and include paths from the dependencies
 include_directories(
-  ${Protobuf_INCLUDE_DIRS}
+  ${PROTOBUF_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 
 link_directories(
-  ${Protobuf_LIBRARY_DIRS}
+  ${Boost_LIBRARY_DIRS}
 )
 
-if (Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIRS})
-  link_directories(${Boost_LIBRARY_DIRS})
-endif ()
-
+if (EDDY_BUILD_CLIENT)
+include_directories(
+  ${OIS_INCLUDE_DIRS}
+  ${OGRE_INCLUDE_DIRS}
+)
+link_directories(
+  ${OIS_LIBRARY_DIRS}
+  ${OGRE_LIBRARY_DIRS}
+)
+endif (EDDY_BUILD_CLIENT)

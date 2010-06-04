@@ -15,28 +15,24 @@ target_link_libraries(refservertest ${EDDYSDK})
 add_executable(refclienttest refclienttest.cc)
 target_link_libraries(refclienttest ${EDDYSDK})
 
-add_custom_command(OUTPUT messagetest.pb.h messagetest.pb.cc
-	COMMAND protoc --cpp_out=./ messagetest.proto
-	DEPENDS messagetest.proto)
+PROTOBUF_GENERATE_CPP(MESSAGETEST_SRCS MESSAGETEST_HDRS messagetest.proto)
 
-add_executable(messagetest messagetest.cc messagetest.pb.cc)
-target_link_libraries(messagetest ${EDDYSDK} ${Protoc_LIBRARIES} ${Protobuf_LIBRARIES})
+add_executable(messagetest messagetest.cc ${MESSAGETEST_SRCS} ${MESSAGETEST_HDRS})
+target_link_libraries(messagetest ${EDDYSDK} ${PROTOBUF_LIBRARY} ${PROTOBUF_PROTOC_LIBRARY})
 if (linux)
 target_link_libraries(messagetest pthread)
 endif (linux)
 
-add_custom_command(OUTPUT proto.pb.h proto.pb.cc
-	COMMAND protoc --cpp_out=./ proto.proto
-	DEPENDS proto.proto)
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS proto.proto)
 
-add_executable(protoserver protoserver.cc proto.pb.cc)
-target_link_libraries(protoserver ${EDDYSDK} ${Protoc_LIBRARIES} ${Protobuf_LIBRARIES})
+add_executable(protoserver protoserver.cc ${PROTO_SRCS} ${PROTO_HDRS})
+target_link_libraries(protoserver ${EDDYSDK} ${PROTOBUF_LIBRARY} ${PROTOBUF_PROTOC_LIBRARY})
 if (linux)
 target_link_libraries(protoserver pthread)
 endif (linux)
 
-add_executable(protoclient protoclient.cc proto.pb.cc)
-target_link_libraries(protoclient ${EDDYSDK} ${Protoc_LIBRARIES} ${Protobuf_LIBRARIES})
+add_executable(protoclient protoclient.cc ${PROTO_SRCS} ${PROTO_HDRS})
+target_link_libraries(protoclient ${EDDYSDK} ${PROTOBUF_LIBRARY} ${PROTOBUF_PROTOC_LIBRARY})
 if (linux)
 target_link_libraries(protoclient pthread)
 endif (linux)
