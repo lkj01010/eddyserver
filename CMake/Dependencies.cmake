@@ -11,9 +11,18 @@ getenv_path(EDDY_DEPENDENCIES_DIR)
     "${EDDY_BINARY_DIR}/../dependencies"
     "${EDDY_SOURCE_DIR}/../dependencies"
   )
+  
+message(STATUS "CMAKE_BUILD_TYPE:" ${CMAKE_BUILD_TYPE})
+	set(CMAKE_LIBRARY_PATH
+	${CMAKE_LIBRARY_PATH}
+	"${EDDY_BINARY_DIR}/dependencies/lib/${CMAKE_BUILD_TYPE}"
+    "${EDDY_SOURCE_DIR}/dependencies/lib/${CMAKE_BUILD_TYPE}"
+    "${EDDY_BINARY_DIR}/../dependencies/lib/${CMAKE_BUILD_TYPE}"
+    "${EDDY_SOURCE_DIR}/../dependencies/lib/${CMAKE_BUILD_TYPE}"
+	)
 
 
-message(STATUS "Search path: ${EDDY_DEP_SEARCH_PATH}")
+message(STATUS "Search path: ${EDDY_DEP_SEARCH_PATH}, ${CMAKE_LIBRARY_PATH}" )
 
 # Set hardcoded path guesses for various platforms
 if (UNIX)

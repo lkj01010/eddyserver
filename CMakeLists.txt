@@ -38,7 +38,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 #build type
-if (CMAKE_BUILD_TYPE STREQUAL "")
+if (NOT CMAKE_BUILD_TYPE)
   # CMake defaults to leaving CMAKE_BUILD_TYPE empty. This screws up
   # differentiation between debug and release builds.
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: None (CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel." FORCE)
@@ -84,10 +84,6 @@ endif (MSVC)
 #options
 option(EDDY_BUILD_COMMON "Build common libs" TRUE)
 option(EDDY_BUILD_CLIENT "Build client" TRUE)
-
-#path
-set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/depencencies/include)
-set(CMAKE_LIBRARY_PATH ${CMAKE_INCLUDE_PATH} ${PROJECT_SOURCE_DIR}/depencencies/lib)
 
 #supress relative path warning
 cmake_policy(SET CMP0015 NEW)
