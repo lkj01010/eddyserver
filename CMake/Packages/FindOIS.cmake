@@ -25,7 +25,7 @@ getenv_path(EDDY_SOURCE)
 # construct search paths
 set(OIS_PREFIX_PATH ${OIS_HOME} ${ENV_OIS_HOME} 
   ${EDDY_SOURCE}/iPhoneDependencies ${ENV_EDDY_SOURCE}/iPhoneDependencies
-  ${EDDY_SOURCE}/Dependencies ${ENV_EDDY_SOURCE}/Dependencies
+  ${EDDY_SOURCE}/dependencies ${ENV_EDDY_SOURCE}/dependencies
   ${EDDY_SDK} ${ENV_EDDY_SDK}
   ${EDDY_HOME} ${ENV_EDDY_HOME})
 create_search_paths(OIS)
