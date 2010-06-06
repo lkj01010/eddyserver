@@ -35,8 +35,8 @@ template < class T >
     typedef T IDType;
 
     // ====================  LIFECYCLE     =======================================
-    IDGenerator(T min_id = std::numeric_limits<T>::min(), 
-                T max_id = std::numeric_limits<T>::max(), 
+    IDGenerator(T min_id = (std::numeric_limits<T>::min()), 
+                T max_id = (std::numeric_limits<T>::max()), 
                 size_t threshold = 4096) 
         : min_(min_id), max_(max_id), next_(min_id), threshold_(threshold) { 
         }

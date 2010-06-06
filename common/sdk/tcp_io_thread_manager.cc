@@ -28,7 +28,7 @@ using namespace boost;
 
 TCPIOThreadManager::TCPIOThreadManager(size_t thread_num)
     : session_id_generator_(kInvalidTCPSessionID + 1, 
-                            std::numeric_limits<SessionIDGenerator::IDType>::max()) {
+                            (std::numeric_limits<SessionIDGenerator::IDType>::max())) {
       threads_.reserve(thread_num + 1);
       for (size_t i = 0; i <= thread_num; ++i)
         threads_.push_back(ThreadPointer(new TCPIOThread(i, *this)));

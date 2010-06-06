@@ -747,7 +747,7 @@ namespace OgreBites
 			}
 			mItemElements.clear();
 
-			mItemsShown = std::max<int>(2, std::min<int>(mMaxItemsShown, mItems.size()));
+			mItemsShown = (std::max<int>(2, std::min<int>(mMaxItemsShown, mItems.size())));
 
 			for (unsigned int i = 0; i < mItemsShown; i++)   // create all the item elements
 			{
