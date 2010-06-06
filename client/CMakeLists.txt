@@ -16,6 +16,14 @@
 # For more information about CMake, see http://www.cmake.org             #
 ##########################################################################
 #eddy sdk
-add_subdirectory(demo)
-add_subdirectory(editor)
+add_executable(editor 
+	editor/editor.cc 
+	editor/sdk_camera_man.h 
+	editor/sdk_trays.h)
+target_link_libraries(editor ${OGRE_LIBRARY} ${OIS_LIBRARY}) 
 
+add_executable(ogretest 
+	demo/camera_controller.h 
+	demo/camera_controller.cc 
+	demo/ogretest.cc)
+target_link_libraries(ogretest ${OGRE_LIBRARY} ${OIS_LIBRARY})

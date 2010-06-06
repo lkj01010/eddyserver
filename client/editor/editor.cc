@@ -63,7 +63,11 @@ class MyApp : public Ogre::WindowEventListener,
 
   void Setup() {
     // init root
+#ifdef _DEBUG
+    root_ = OGRE_NEW Ogre::Root(configDir_ + "plugins_d.cfg", 
+#else
     root_ = OGRE_NEW Ogre::Root(configDir_ + "plugins.cfg", 
+#endif
                                 configDir_ + "ogre.cfg", 
                                 configDir_ + "ogre.log");
     root_->addFrameListener(this);
@@ -148,7 +152,11 @@ class MyApp : public Ogre::WindowEventListener,
 
   void LoadResources() {
     Ogre::ConfigFile configFile;
+#ifdef _DEBUG
+    configFile.load(configDir_ + "resources_d.cfg");
+#else
     configFile.load(configDir_ + "resources.cfg");
+#endif
 
     Ogre::ConfigFile::SectionIterator seci = configFile.getSectionIterator();
     Ogre::String sec, type, arch;
