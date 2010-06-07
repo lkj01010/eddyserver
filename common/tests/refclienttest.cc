@@ -20,6 +20,7 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/asio/ip/tcp.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -53,9 +54,12 @@ class Session {
   socket_(io_service) {
     buffer_[sizeof(kLongMessage - 1)] = '\0';
     socket_.connect(endpoint);
+	socket_.set_option(tcp::no_delay(true));
+	time_ = microsec_clock::local_time();
     async_write(socket_, buffer(kLongMessage, sizeof(kLongMessage)),
                         boost::bind(&Session::HandleWrite, this));
     async_read(socket_, buffer(buffer_, sizeof(kLongMessage)), boost::bind(&Session::HandleRead, this));
+
   }
 
  private:
@@ -66,13 +70,13 @@ class Session {
                         boost::bind(&Session::HandleWrite, this));
     async_read(socket_, buffer(buffer_, sizeof(kLongMessage)), boost::bind(&Session::HandleRead, this));
     ptime new_time = microsec_clock::local_time();
-    cout << new_time - time << endl;
-    time = new_time;
+    cout << new_time - time_ << endl;
+    time_ = new_time;
   }
 
   tcp::socket socket_;
   char buffer_[sizeof(kLongMessage)];
-  ptime time;
+  ptime time_;
 };
 
 int main(int argc, char* argv[])
@@ -82,7 +86,7 @@ int main(int argc, char* argv[])
     boost::asio::io_service io_service;
 
     tcp::resolver resolver(io_service);
-    tcp::resolver::query query(tcp::v4(), "127.0.0.1", "20000");
+    tcp::resolver::query query(tcp::v4(), "127.0.0.1", "7000");
     tcp::resolver::iterator iterator = resolver.resolve(query);
 
     list<boost::shared_ptr<Session> > list;

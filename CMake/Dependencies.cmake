@@ -11,16 +11,6 @@ getenv_path(EDDY_DEPENDENCIES_DIR)
     "${EDDY_BINARY_DIR}/../dependencies"
     "${EDDY_SOURCE_DIR}/../dependencies"
   )
-  
-message(STATUS "CMAKE_BUILD_TYPE:" ${CMAKE_BUILD_TYPE})
-	set(CMAKE_LIBRARY_PATH
-	${CMAKE_LIBRARY_PATH}
-	"${EDDY_BINARY_DIR}/dependencies/lib/${CMAKE_BUILD_TYPE}"
-    "${EDDY_SOURCE_DIR}/dependencies/lib/${CMAKE_BUILD_TYPE}"
-    "${EDDY_BINARY_DIR}/../dependencies/lib/${CMAKE_BUILD_TYPE}"
-    "${EDDY_SOURCE_DIR}/../dependencies/lib/${CMAKE_BUILD_TYPE}"
-	)
-
 
 message(STATUS "Search path: ${EDDY_DEP_SEARCH_PATH}, ${CMAKE_LIBRARY_PATH}" )
 
@@ -56,7 +46,31 @@ endif (UNIX)
 find_package(Boost REQUIRED)
 macro_log_feature(Boost_FOUND "boost" "Boost (general)" "http://boost.org" FALSE "" "")
 
-find_package(Protobuf REQUIRED)
+find_package(Protobuf)
+if (NOT PROTOBUF_FOUND)
+	if (WIN32)
+		set(PROTOBUF_LIBRARY_NAMES "libprotobuf")
+	else (WIN32)
+		set(PROTOBUF_LIBRARY_NAMES "protobuf")
+	endif (WIN32)
+	find_path(PROTOBUF_INCLUDE_DIR NAMES "google/protobuf/dynamic_message.h" "google/protobuf/wire_format_lite.h" HINTS "${EDDY_SOURCE_DIR}/dependencies/include" PATH_SUFFIXES "")
+	find_library(PROTOBUF_LIBRARY_REL NAMES ${PROTOBUF_LIBRARY_NAMES} HINTS ${EDDY_SOURCE_DIR}/dependencies PATH_SUFFIXES "" release relwithdebinfo minsizerel)
+	find_library(PROTOBUF_LIBRARY_DBG NAMES ${PROTOBUF_LIBRARY_NAMES} HINTS ${EDDY_SOURCE_DIR}/dependencies PATH_SUFFIXES "" debug)
+	make_library_set(PROTOBUF_LIBRARY)
+	findpkg_finish(PROTOBUF)
+	
+	if (WIN32)
+		set(PROTOBUF_PROTOC_LIBRARY_NAMES "libprotoc")
+	else (WIN32)
+		set(PROTOBUF_PROTOC_LIBRARY_NAMES "protoc")
+	endif (WIN32)
+	find_path(PROTOBUF_PROTOC_INCLUDE_DIR NAMES "google/protobuf/dynamic_message.h" "google/protobuf/wire_format_lite.h" HINTS "${EDDY_SOURCE_DIR}/dependencies/include" PATH_SUFFIXES "")
+	find_library(PROTOBUF_PROTOC_LIBRARY_REL NAMES ${PROTOBUF_PROTOC_LIBRARY_NAMES} HINTS ${EDDY_SOURCE_DIR}/dependencies PATH_SUFFIXES "" release relwithdebinfo minsizerel)
+	find_library(PROTOBUF_PROTOC_LIBRARY_DBG NAMES ${PROTOBUF_PROTOC_LIBRARY_NAMES} HINTS ${EDDY_SOURCE_DIR}/dependencies PATH_SUFFIXES "" debug)
+	make_library_set(PROTOBUF_PROTOC_LIBRARY)
+	findpkg_finish(PROTOBUF_PROTOC)
+endif (NOT PROTOBUF_FOUND)
+
 macro_log_feature(PROTOBUF_FOUND "protobuf" "Protobuf (general)" "http://code.google.com/p/protobuf/" FALSE "" "")
 
 if (EDDY_BUILD_CLIENT)

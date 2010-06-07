@@ -93,6 +93,8 @@ public:
 		scene_manager_->setShadowColour(Ogre::ColourValue(0.6, 0.6, 0.6));
 		scene_manager_->setAmbientLight(Ogre::ColourValue(0.3, 0.3, 0.3));
 
+		scene_manager_->setFog(Ogre::FOG_LINEAR, ColourValue(1.0f, 1.0f, 0.8f), 0, 15, 100);
+
 		// create a floor mesh resource
 		Ogre::MeshManager::getSingleton().createPlane("floor", 
 			Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -130,6 +132,7 @@ public:
 		// camera
 		camera_ = scene_manager_->createCamera("MainCamera");
 		viewport_ = root_->getAutoCreatedWindow()->addViewport(camera_);
+		viewport_->setBackgroundColour(ColourValue(1.0f, 1.0f, 0.8f));
 		camera_->setAspectRatio((Ogre::Real)viewport_->getActualWidth() 
 			/ (Ogre::Real)viewport_->getActualHeight());
 		camera_->setNearClipDistance(5);

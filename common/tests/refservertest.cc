@@ -28,6 +28,7 @@
 #include <iostream>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/ip/tcp.hpp>
 
 using boost::asio::ip::tcp;
 
@@ -46,6 +47,7 @@ public:
 
   void start()
   {
+	socket_.set_option(tcp::no_delay(true));
     socket_.async_read_some(boost::asio::buffer(data_, max_length),
         boost::bind(&session::handle_read, this,
           boost::asio::placeholders::error,
@@ -131,7 +133,7 @@ int main(int argc, char* argv[])
     boost::asio::io_service io_service;
 
     using namespace std; // For atoi.
-    server s(io_service, 20000);
+    server s(io_service, 7000);
 
     io_service.run();
   }
