@@ -25,5 +25,7 @@ target_link_libraries(editor ${OGRE_LIBRARY} ${OIS_LIBRARY})
 add_executable(ogretest 
 	demo/camera_controller.h 
 	demo/camera_controller.cc 
+	demo/scene_terrain.h
+	demo/scene_terrain.cc
 	demo/ogretest.cc)
-target_link_libraries(ogretest ${OGRE_LIBRARY} ${OIS_LIBRARY})
+target_link_libraries(ogretest ${OGRE_Terrain_LIBRARY} ${OGRE_LIBRARY} ${OIS_LIBRARY})

@@ -29,6 +29,7 @@
 #include    "OGRE/OgreShadowCameraSetupLiSPSM.h"
 
 #include	"camera_controller.h"
+#include   "scene_terrain.h"
 
 const int kCharHeight = 5;         // height of character's center of mass above groun
 const size_t kNumModels = 5;
@@ -87,39 +88,47 @@ public:
 		//scene_manager_->setShadowTextureReceiverMaterial(CUSTOM_RECEIVER_MATERIAL);
 		//scene_manager_->setShadowTextureSelfShadow(true);
 
-		scene_manager_->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_ADDITIVE);
+		scene_manager_->setShadowTechnique(Ogre::SHADOWTYPE_NONE);
 		scene_manager_->setShadowTextureSize(512);
 		scene_manager_->setShadowTextureCount(2);
 		scene_manager_->setShadowColour(Ogre::ColourValue(0.6, 0.6, 0.6));
-		scene_manager_->setAmbientLight(Ogre::ColourValue(0.3, 0.3, 0.3));
 
-		scene_manager_->setFog(Ogre::FOG_LINEAR, ColourValue(1.0f, 1.0f, 0.8f), 0, 15, 100);
+		scene_manager_->setFog(Ogre::FOG_LINEAR, ColourValue(0.7, 0.7, 0.8), 0, 10000, 25000);
+		scene_manager_->setSkyBox(true, "CloudyNoonSkyBox");
 
-		// create a floor mesh resource
-		Ogre::MeshManager::getSingleton().createPlane("floor", 
-			Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-			Ogre::Plane(Ogre::Vector3::UNIT_Y, -1), 
-			250, 250, 25, 25, true, 1, 15, 15, 
-			Ogre::Vector3::UNIT_Z);
+		Vector3 lightdir(0.55, -0.3, 0.75);
+		lightdir.normalise();
 
-		// add a floor to our scene using the floor mesh we created
-		Ogre::Entity* floor = scene_manager_->createEntity("Floor", "floor");
-		floor->setMaterialName("Rockwall");
-		scene_manager_->getRootSceneNode()->attachObject(floor);
+		Light* l = scene_manager_->createLight("sun");
+		l->setType(Light::LT_DIRECTIONAL);
+		l->setDirection(lightdir);
+		l->setDiffuseColour(ColourValue::White);
+		l->setSpecularColour(ColourValue(0.4, 0.4, 0.4));
 
-		// add a blue spotlight
-		Ogre::Light* l = scene_manager_->createLight();
-		Ogre::Vector3 dir;
-		l->setType(Ogre::Light::LT_SPOTLIGHT);
-		l->setPosition(-70, 100, 30);
-		l->setSpotlightRange(Ogre::Degree(30),Ogre::Degree(75));
-		dir = -l->getPosition();
-		dir.normalise();
-		l->setDirection(dir);
-		l->setDiffuseColour(0.3, 0.5, 0.5);
+		scene_manager_->setAmbientLight(ColourValue(0.3, 0.3, 0.3));
+
+		// find character pos
+		terrain_.setupContent(scene_manager_, l);
+		Ray ray;
+		ray.setOrigin(Vector3(0, 10000, 0));
+		ray.setDirection(Vector3::NEGATIVE_UNIT_Y);
+
+		TerrainGroup::RayResult ray_result = terrain_.findIntersect(ray);
+		// camera
+		camera_ = scene_manager_->createCamera("MainCamera");
+		viewport_ = root_->getAutoCreatedWindow()->addViewport(camera_);
+		viewport_->setBackgroundColour(ColourValue(1.0f, 1.0f, 0.8f));
+		camera_->setAspectRatio((Ogre::Real)viewport_->getActualWidth() 
+			/ (Ogre::Real)viewport_->getActualHeight());
+		camera_->setNearClipDistance(0.1);
+		camera_->setFarClipDistance(20000);
+		camera_->setPosition(ray_result.position + Vector3(0, kCharHeight, 10));
+		camera_->lookAt(ray_result.position);
+
+		camera_controller_ = new CameraController(camera_);
 
 		// create main model
-		body_node_ = scene_manager_->getRootSceneNode()->createChildSceneNode(Vector3::UNIT_Y * kCharHeight);
+		body_node_ = scene_manager_->getRootSceneNode()->createChildSceneNode(Vector3::UNIT_Y * kCharHeight + ray_result.position);
 		body_ent_ = scene_manager_->createEntity("SinbadBody", "Sinbad.mesh");
 		body_node_->attachObject(body_ent_);
 
@@ -128,19 +137,6 @@ public:
 		sword2_ = scene_manager_->createEntity("SinbadSword2", "Sword.mesh");
 		body_ent_->attachObjectToBone("Sheath.L", sword1_);
 		body_ent_->attachObjectToBone("Sheath.R", sword2_);
-
-		// camera
-		camera_ = scene_manager_->createCamera("MainCamera");
-		viewport_ = root_->getAutoCreatedWindow()->addViewport(camera_);
-		viewport_->setBackgroundColour(ColourValue(1.0f, 1.0f, 0.8f));
-		camera_->setAspectRatio((Ogre::Real)viewport_->getActualWidth() 
-			/ (Ogre::Real)viewport_->getActualHeight());
-		camera_->setNearClipDistance(5);
-		camera_->setFarClipDistance(100000);
-		camera_->setPosition(10, 15, 50);
-		camera_->lookAt(10, 15, 0);
-
-		camera_controller_ = new CameraController(camera_);
 
 		// input
 		setupInput();
@@ -211,6 +207,7 @@ public:
 
 	void clear() {
 		// clear
+		terrain_.shutdown();
 		scene_manager_->clearScene();
 		root_->destroySceneManager(scene_manager_);
 		Ogre::WindowEventUtilities::removeWindowEventListener(root_->getAutoCreatedWindow(), this);
@@ -316,6 +313,7 @@ private:
 	Entity*			sword1_;
 	Entity*			sword2_;
 	CameraController* camera_controller_;
+	SceneTerrain terrain_;
 	OIS::InputManager* input_manager_;   // OIS input manager
 	OIS::Keyboard*	key_board_;       // keyboard device
 	OIS::Mouse*		mouse_;             // mouse device
