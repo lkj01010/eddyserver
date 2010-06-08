@@ -1,0 +1,197 @@
+material Sinbad/Body : Ogre/shadow/depth/integrated/pssm
+{
+	receive_shadows on
+	technique base
+	{
+		pass base
+		{
+			ambient 0.75 0.75 0.75
+			diffuse 1 1 1 1
+			
+			texture_unit diffuse
+			{
+				texture sinbad_body.tga
+			}
+		}
+	}
+}
+material Sinbad/Gold : Ogre/shadow/depth/integrated/pssm
+{
+	receive_shadows on
+	technique base
+	{
+		pass base
+		{
+			ambient 0.75 0.75 0.75
+			diffuse 0.8 0.8 0.8 1
+			specular 0.3 0.3 0.2 5.5
+			
+			texture_unit diffuse
+			{
+				texture sinbad_clothes.tga
+			}
+		}
+	}
+}
+material Sinbad/Sheaths : Ogre/shadow/depth/integrated/pssm
+{
+	receive_shadows on
+	technique base
+	{
+		pass base
+		{
+			ambient 0.75 0.75 0.75
+			diffuse 1 1 1 1
+			specular 0.2 0.1 0.1 1.0 50.0
+			
+			texture_unit diffuse
+			{
+				texture sinbad_sword.tga
+			}
+		}
+	}
+}
+material Sinbad/Clothes : Ogre/shadow/depth/integrated/pssm
+{
+	receive_shadows on
+	technique base
+	{
+		pass base
+		{
+			ambient 0.75 0.75 0.75
+			diffuse 1 1 1 1
+			specular 0.05 0.05 0.05 12.5
+			
+			texture_unit diffuse
+			{
+				texture sinbad_clothes.tga
+			}
+		}
+	}
+}
+material Sinbad/Teeth : Ogre/shadow/depth/integrated/pssm
+{
+	receive_shadows on
+	technique base
+	{
+		pass base
+		{
+			ambient 0.75 0.75 0.75
+			diffuse 1 1 1 1
+			specular 0.25 0.25 0.25 10.5
+			
+			texture_unit diffuse
+			{
+				texture sinbad_body.tga
+			}
+		}
+	}
+}
+material Sinbad/Eyes : Ogre/shadow/depth/integrated/pssm
+{
+	receive_shadows on
+	technique base
+	{
+		pass base
+		{
+			ambient 0.75 0.75 0.75
+			diffuse 1 1 1 1
+			specular 0.75 0.75 0.75 55.5
+			
+			texture_unit diffuse
+			{
+				texture sinbad_body.tga
+			}
+		}
+	}
+}
+material Sinbad/Spikes : Ogre/shadow/depth/integrated/pssm
+{
+	receive_shadows on
+	technique base
+	{
+		pass base
+		{
+			ambient 0.75 0.75 0.75
+			diffuse 1 1 1 1
+			specular 0.75 0.75 0.75 20.5
+			
+			texture_unit diffuse
+			{
+				texture sinbad_clothes.tga
+			}
+		}
+	}
+}
+material Sinbad/Blade : Ogre/shadow/depth/integrated/pssm
+{
+	receive_shadows on
+	technique base
+	{
+		pass base
+		{
+			ambient 0.75 0.75 0.75
+			diffuse 1 1 1 1
+			specular 1 1 1 10.5
+			
+			texture_unit diffuse
+			{
+				texture sinbad_sword.tga
+			}
+		}
+	}
+}
+material Sinbad/Ruby : Ogre/shadow/depth/integrated/pssm
+{
+	receive_shadows on
+	technique base
+	{
+		pass base
+		{
+			ambient 0.75 0.75 0.75
+			diffuse 1 1 1 1
+			specular 0.75 0.75 0.75 20.5
+			
+			texture_unit diffuse
+			{
+				texture sinbad_sword.tga
+			}
+		}
+	}
+}
+material Sinbad/Hilt : Ogre/shadow/depth/integrated/pssm
+{
+	receive_shadows on
+	technique base
+	{
+		pass base
+		{
+			ambient 0.75 0.75 0.75
+			diffuse 0.8 0.8 0.8 1
+			specular 0.3 0.3 0.2 5.5
+			
+			texture_unit diffuse
+			{
+				texture sinbad_sword.tga
+			}
+		}
+	}
+}
+material Sinbad/Handle : Ogre/shadow/depth/integrated/pssm
+{
+	receive_shadows on
+	technique base
+	{
+		pass base
+		{
+			ambient 0.75 0.75 0.75
+			diffuse 1 1 1 1
+			specular 0.05 0.05 0.05 12.5
+			
+			texture_unit diffuse
+			{
+				texture sinbad_sword.tga
+			}
+		}
+	}
+}

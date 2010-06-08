@@ -1,6 +1,8 @@
 #include "scene_terrain.h"
 
 #include "OGRE/OgreMaterialManager.h"
+#include "OGRE/OgreGpuProgramManager.h"
+#include "OGRE/OgreShadowCameraSetupPSSM.h"
 
 #define TERRAIN_PAGE_MIN_X 0
 #define TERRAIN_PAGE_MIN_Y 0
@@ -32,7 +34,7 @@ void SceneTerrain::testCapabilities(const RenderSystemCapabilities* caps)
 
 TerrainGroup::RayResult SceneTerrain::findIntersect(const Ray& ray)
 {
-		return terrain_group_->rayIntersects(ray);
+	return terrain_group_->rayIntersects(ray);
 }
 
 bool SceneTerrain::frameRenderingQueued(const FrameEvent& evt)
@@ -338,7 +340,7 @@ void SceneTerrain::configureShadows(bool enabled, bool depthShadows)
 }
 
 
-void SceneTerrain::setupContent(SceneManager* scene_manager, Light* l)
+void SceneTerrain::setupContent(SceneManager* scene_manager, Light* l, Camera* camera)
 {
 	terrain_globals_ = OGRE_NEW Ogre::TerrainGlobalOptions();
 
@@ -367,10 +369,52 @@ void SceneTerrain::setupContent(SceneManager* scene_manager, Light* l)
 	terrain_group_->freeTemporaryResources();
 	saveTerrains(true);
 	TerrainMaterialGeneratorA::SM2Profile* mat_profile = 
-	static_cast<TerrainMaterialGeneratorA::SM2Profile*>(terrain_globals_->getDefaultMaterialGenerator()->getActiveProfile());
-	mat_profile->setReceiveDynamicShadowsEnabled(false);
+		static_cast<TerrainMaterialGeneratorA::SM2Profile*>(terrain_globals_->getDefaultMaterialGenerator()->getActiveProfile());
+	mat_profile->setReceiveDynamicShadowsEnabled(true);
 
 	mat_profile->setReceiveDynamicShadowsLowLod(false);
+
+	// General scene setup
+	scene_manager->setShadowTechnique(SHADOWTYPE_TEXTURE_ADDITIVE_INTEGRATED);
+	scene_manager->setShadowFarDistance(3000);
+
+	// 3 textures per directional light (PSSM)
+	scene_manager->setShadowTextureCountPerLightType(Ogre::Light::LT_DIRECTIONAL, 3);
+
+	if (pssm_setup_.isNull())
+	{
+		// shadow camera setup
+		PSSMShadowCameraSetup* pssmSetup = new PSSMShadowCameraSetup();
+		pssmSetup->setSplitPadding(camera->getNearClipDistance());
+		pssmSetup->calculateSplitPoints(3, camera->getNearClipDistance(), scene_manager->getShadowFarDistance());
+		pssmSetup->setOptimalAdjustFactor(0, 2);
+		pssmSetup->setOptimalAdjustFactor(1, 1);
+		pssmSetup->setOptimalAdjustFactor(2, 0.5);
+
+		pssm_setup_.bind(pssmSetup);
+
+	}
+	scene_manager->setShadowCameraSetup(pssm_setup_);
+
+	scene_manager->setShadowTextureCount(3);
+	scene_manager->setShadowTextureConfig(0, 2048, 2048, PF_FLOAT32_R);
+	scene_manager->setShadowTextureConfig(1, 1024, 1024, PF_FLOAT32_R);
+	scene_manager->setShadowTextureConfig(2, 1024, 1024, PF_FLOAT32_R);
+	scene_manager->setShadowTextureSelfShadow(true);
+	scene_manager->setShadowCasterRenderBackFaces(true);
+
+	Vector4 splitPoints;
+	const PSSMShadowCameraSetup::SplitPointList& splitPointList = 
+		static_cast<PSSMShadowCameraSetup*>(pssm_setup_.get())->getSplitPoints();
+	for (int i = 0; i < 3; ++i)
+	{
+		splitPoints[i] = splitPointList[i];
+	}
+	GpuSharedParametersPtr p = GpuProgramManager::getSingleton().getSharedParameters("pssm_params");
+	p->setNamedConstant("pssmSplitPoints", splitPoints);
+
+	mat_profile->setReceiveDynamicShadowsDepth(true);
+	mat_profile->setReceiveDynamicShadowsPSSM(static_cast<PSSMShadowCameraSetup*>(pssm_setup_.get()));
 }
 
 void SceneTerrain::shutdown()

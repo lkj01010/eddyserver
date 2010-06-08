@@ -27,7 +27,7 @@ public:
 
 	bool keyPressed (const OIS::KeyEvent &e);
 	
-	void setupContent(Ogre::SceneManager* scene_manager, Ogre::Light* l);
+	void setupContent(Ogre::SceneManager* scene_manager, Ogre::Light* l, Ogre::Camera* camera);
 
 	const Ogre::Vector3& terrain_pos() { return terrain_pos_; }
 

@@ -96,7 +96,7 @@ public:
 		scene_manager_->setFog(Ogre::FOG_LINEAR, ColourValue(0.7, 0.7, 0.8), 0, 10000, 25000);
 		scene_manager_->setSkyBox(true, "CloudyNoonSkyBox");
 
-		Vector3 lightdir(0.55, -0.3, 0.75);
+		Vector3 lightdir(-0.55, -0.4, -0.75);
 		lightdir.normalise();
 
 		Light* l = scene_manager_->createLight("sun");
@@ -106,14 +106,6 @@ public:
 		l->setSpecularColour(ColourValue(0.4, 0.4, 0.4));
 
 		scene_manager_->setAmbientLight(ColourValue(0.3, 0.3, 0.3));
-
-		// find character pos
-		terrain_.setupContent(scene_manager_, l);
-		Ray ray;
-		ray.setOrigin(Vector3(0, 10000, 0));
-		ray.setDirection(Vector3::NEGATIVE_UNIT_Y);
-
-		TerrainGroup::RayResult ray_result = terrain_.findIntersect(ray);
 		// camera
 		camera_ = scene_manager_->createCamera("MainCamera");
 		viewport_ = root_->getAutoCreatedWindow()->addViewport(camera_);
@@ -122,6 +114,15 @@ public:
 			/ (Ogre::Real)viewport_->getActualHeight());
 		camera_->setNearClipDistance(0.1);
 		camera_->setFarClipDistance(20000);
+
+		// find character pos
+		terrain_.setupContent(scene_manager_, l, camera_);
+		Ray ray;
+		ray.setOrigin(Vector3(0, 10000, 0));
+		ray.setDirection(Vector3::NEGATIVE_UNIT_Y);
+
+		TerrainGroup::RayResult ray_result = terrain_.findIntersect(ray);
+	
 		camera_->setPosition(ray_result.position + Vector3(0, kCharHeight, 10));
 		camera_->lookAt(ray_result.position);
 
