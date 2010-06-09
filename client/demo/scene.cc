@@ -1,8 +1,14 @@
-#include "scene_terrain.h"
+#include "scene.h"
 
 #include "OGRE/OgreMaterialManager.h"
 #include "OGRE/OgreGpuProgramManager.h"
 #include "OGRE/OgreShadowCameraSetupPSSM.h"
+
+#include "OGRE/Terrain/OgreTerrain.h"
+#include "OGRE/Terrain/OgreTerrainGroup.h"
+#include "OGRE/Terrain/OgreTerrainMaterialGeneratorA.h"
+
+#include "character.h"
 
 #define TERRAIN_PAGE_MIN_X 0
 #define TERRAIN_PAGE_MIN_Y 0
@@ -14,16 +20,22 @@
 #define TERRAIN_WORLD_SIZE 12000.0f
 #define TERRAIN_SIZE 513
 
+const int kCharHeight = 5;         // height of character's center of mass above groun
+
 using namespace Ogre;
 
-SceneTerrain::SceneTerrain()
+Scene::Scene()
 : terrain_globals_(NULL)
-, terrain_group_(0)
+, terrain_group_(NULL)
 , terrain_pos_(0,0,0)
 {
+	scene_manager_	= NULL;
+	camera_			= NULL;
+	camera_controller_ = NULL;
+	character_			= NULL;
 }
 
-void SceneTerrain::testCapabilities(const RenderSystemCapabilities* caps)
+void Scene::testCapabilities(const RenderSystemCapabilities* caps)
 {
 	if (!caps->hasCapability(RSC_VERTEX_PROGRAM) || !caps->hasCapability(RSC_FRAGMENT_PROGRAM))
 	{
@@ -32,14 +44,10 @@ void SceneTerrain::testCapabilities(const RenderSystemCapabilities* caps)
 	}
 }
 
-TerrainGroup::RayResult SceneTerrain::findIntersect(const Ray& ray)
-{
-	return terrain_group_->rayIntersects(ray);
-}
-
-bool SceneTerrain::frameRenderingQueued(const FrameEvent& evt)
-{
 #if 0
+bool Scene::frameRenderingQueued(const FrameEvent& evt)
+{
+
 	if (!mFly)
 	{
 		// clamp to terrain
@@ -66,18 +74,20 @@ bool SceneTerrain::frameRenderingQueued(const FrameEvent& evt)
 
 		}
 	}
-#endif
+
 	return true;
 }
+#endif
 
-void SceneTerrain::saveTerrains(bool onlyIfModified)
+void Scene::saveTerrains(bool onlyIfModified)
 {
 	terrain_group_->saveAllTerrains(onlyIfModified);
 }
 
-bool SceneTerrain::keyPressed (const OIS::KeyEvent &e)
-{
 #if 0
+bool Scene::keyPressed (const OIS::KeyEvent &e)
+{
+
 	switch (e.key)
 	{
 	case OIS::KC_S:
@@ -107,14 +117,15 @@ bool SceneTerrain::keyPressed (const OIS::KeyEvent &e)
 	default:
 		return SdkSample::keyPressed(e);
 	}
-#endif
+
 
 	return true;
 }
+#endif
 
 
 
-void SceneTerrain::defineTerrain(long x, long y, bool flat)
+void Scene::defineTerrain(long x, long y, bool flat)
 {
 	// if a file is available, use it
 	// if not, generate file from import
@@ -142,7 +153,7 @@ void SceneTerrain::defineTerrain(long x, long y, bool flat)
 	}
 }
 
-void SceneTerrain::getTerrainImage(bool flipX, bool flipY, Image& img)
+void Scene::getTerrainImage(bool flipX, bool flipY, Image& img)
 {
 	img.load("terrain.png", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 	if (flipX)
@@ -152,7 +163,7 @@ void SceneTerrain::getTerrainImage(bool flipX, bool flipY, Image& img)
 
 }
 
-void SceneTerrain::initBlendMaps(Terrain* terrain)
+void Scene::initBlendMaps(Terrain* terrain)
 {
 	TerrainLayerBlendMap* blendMap0 = terrain->getLayerBlendMap(1);
 	TerrainLayerBlendMap* blendMap1 = terrain->getLayerBlendMap(2);
@@ -185,7 +196,7 @@ void SceneTerrain::initBlendMaps(Terrain* terrain)
 	blendMap1->update();
 }
 
-void SceneTerrain::configureTerrainDefaults(SceneManager* scene_manager, Light* l)
+void Scene::configureTerrainDefaults(SceneManager* scene_manager_, Light* l)
 {
 	// Configure global
 	terrain_globals_->setMaxPixelError(8);
@@ -199,7 +210,7 @@ void SceneTerrain::configureTerrainDefaults(SceneManager* scene_manager, Light* 
 	//matProfile->setLightmapEnabled(false);
 	// Important to set these so that the terrain knows what to use for derived (non-realtime) data
 	terrain_globals_->setLightMapDirection(l->getDerivedDirection());
-	terrain_globals_->setCompositeMapAmbient(scene_manager->getAmbientLight());
+	terrain_globals_->setCompositeMapAmbient(scene_manager_->getAmbientLight());
 	//terrain_globals_->setCompositeMapAmbient(ColourValue::Red);
 	terrain_globals_->setCompositeMapDiffuse(l->getDiffuseColour());
 
@@ -225,133 +236,44 @@ void SceneTerrain::configureTerrainDefaults(SceneManager* scene_manager, Light* 
 
 }
 
-
-MaterialPtr SceneTerrain::buildDepthShadowMaterial(const String& textureName)
+void Scene::setupContent(Ogre::Root* root)
 {
-#if 0
-	String matName = "DepthShadows/" + textureName;
+	// scene manager
+	scene_manager_ = root->createSceneManager(Ogre::ST_GENERIC);
 
-	MaterialPtr ret = MaterialManager::getSingleton().getByName(matName);
-	if (ret.isNull())
-	{
-		MaterialPtr baseMat = MaterialManager::getSingleton().getByName("Ogre/shadow/depth/integrated/pssm");
-		ret = baseMat->clone(matName);
-		Pass* p = ret->getTechnique(0)->getPass(0);
-		p->getTextureUnitState("diffuse")->setTextureName(textureName);
+	scene_manager_->setFog(Ogre::FOG_LINEAR, ColourValue(0.7, 0.7, 0.8), 0, 10000, 25000);
+	scene_manager_->setSkyBox(true, "CloudyNoonSkyBox");
 
-		Vector4 splitPoints;
-		const PSSMShadowCameraSetup::SplitPointList& splitPointList = 
-			static_cast<PSSMShadowCameraSetup*>(pssm_setup_.get())->getSplitPoints();
-		for (int i = 0; i < 3; ++i)
-		{
-			splitPoints[i] = splitPointList[i];
-		}
-		p->getFragmentProgramParameters()->setNamedConstant("pssmSplitPoints", splitPoints);
+	Vector3 lightdir(-0.55, -0.4, -0.75);
+	lightdir.normalise();
 
+	Light* l = scene_manager_->createLight("sun");
+	l->setType(Light::LT_DIRECTIONAL);
+	l->setDirection(lightdir);
+	l->setDiffuseColour(ColourValue::White);
+	l->setSpecularColour(ColourValue(0.4, 0.4, 0.4));
 
-	}
+	scene_manager_->setAmbientLight(ColourValue(0.3, 0.3, 0.3));
+	// camera_
+	camera_ = scene_manager_->createCamera("MainCamera");
+	Viewport* viewport = root->getAutoCreatedWindow()->addViewport(camera_);
+	viewport->setBackgroundColour(ColourValue(1.0f, 1.0f, 0.8f));
+	camera_->setAspectRatio((Ogre::Real)viewport->getActualWidth() 
+		/ (Ogre::Real)viewport->getActualHeight());
+	camera_->setNearClipDistance(0.1);
+	camera_->setFarClipDistance(20000);
 
-	return ret;
-#endif
-	return MaterialPtr();
-}
-
-
-void SceneTerrain::configureShadows(bool enabled, bool depthShadows)
-{
-#if 0
-	TerrainMaterialGeneratorA::SM2Profile* matProfile = 
-		static_cast<TerrainMaterialGeneratorA::SM2Profile*>(terrain_globals_->getDefaultMaterialGenerator()->getActiveProfile());
-	matProfile->setReceiveDynamicShadowsEnabled(enabled);
-#ifdef SHADOWS_IN_LOW_LOD_MATERIAL
-	matProfile->setReceiveDynamicShadowsLowLod(true);
-#else
-	matProfile->setReceiveDynamicShadowsLowLod(false);
-#endif
-
-	// Default materials
-	for (EntityList::iterator i = mHouseList.begin(); i != mHouseList.end(); ++i)
-	{
-		(*i)->setMaterialName("Examples/TudorHouse");
-	}
-
-	if (enabled)
-	{
-		// General scene setup
-		mSceneMgr->setShadowTechnique(SHADOWTYPE_TEXTURE_ADDITIVE_INTEGRATED);
-		mSceneMgr->setShadowFarDistance(3000);
-
-		// 3 textures per directional light (PSSM)
-		mSceneMgr->setShadowTextureCountPerLightType(Ogre::Light::LT_DIRECTIONAL, 3);
-
-		if (pssm_setup_.isNull())
-		{
-			// shadow camera setup
-			PSSMShadowCameraSetup* pssmSetup = new PSSMShadowCameraSetup();
-			pssmSetup->setSplitPadding(mCamera->getNearClipDistance());
-			pssmSetup->calculateSplitPoints(3, mCamera->getNearClipDistance(), mSceneMgr->getShadowFarDistance());
-			pssmSetup->setOptimalAdjustFactor(0, 2);
-			pssmSetup->setOptimalAdjustFactor(1, 1);
-			pssmSetup->setOptimalAdjustFactor(2, 0.5);
-
-			pssm_setup_.bind(pssmSetup);
-
-		}
-		mSceneMgr->setShadowCameraSetup(pssm_setup_);
-
-		if (depthShadows)
-		{
-			mSceneMgr->setShadowTextureCount(3);
-			mSceneMgr->setShadowTextureConfig(0, 2048, 2048, PF_FLOAT32_R);
-			mSceneMgr->setShadowTextureConfig(1, 1024, 1024, PF_FLOAT32_R);
-			mSceneMgr->setShadowTextureConfig(2, 1024, 1024, PF_FLOAT32_R);
-			mSceneMgr->setShadowTextureSelfShadow(true);
-			mSceneMgr->setShadowCasterRenderBackFaces(true);
-			mSceneMgr->setShadowTextureCasterMaterial("PSSM/shadow_caster");
-
-			MaterialPtr houseMat = buildDepthShadowMaterial("fw12b.jpg");
-			for (EntityList::iterator i = mHouseList.begin(); i != mHouseList.end(); ++i)
-			{
-				(*i)->setMaterial(houseMat);
-			}
-
-		}
-		else
-		{
-			mSceneMgr->setShadowTextureCount(3);
-			mSceneMgr->setShadowTextureConfig(0, 2048, 2048, PF_X8B8G8R8);
-			mSceneMgr->setShadowTextureConfig(1, 1024, 1024, PF_X8B8G8R8);
-			mSceneMgr->setShadowTextureConfig(2, 1024, 1024, PF_X8B8G8R8);
-			mSceneMgr->setShadowTextureSelfShadow(false);
-			mSceneMgr->setShadowCasterRenderBackFaces(false);
-			mSceneMgr->setShadowTextureCasterMaterial(StringUtil::BLANK);
-		}
-
-		matProfile->setReceiveDynamicShadowsDepth(depthShadows);
-		matProfile->setReceiveDynamicShadowsPSSM(static_cast<PSSMShadowCameraSetup*>(pssm_setup_.get()));
-
-	}
-	else
-	{
-		mSceneMgr->setShadowTechnique(SHADOWTYPE_NONE);
-	}
-
-#endif
-}
-
-
-void SceneTerrain::setupContent(SceneManager* scene_manager, Light* l, Camera* camera)
-{
+	// terrain
 	terrain_globals_ = OGRE_NEW Ogre::TerrainGlobalOptions();
 
 	MaterialManager::getSingleton().setDefaultTextureFiltering(TFO_ANISOTROPIC);
 	MaterialManager::getSingleton().setDefaultAnisotropy(7);
 
-	terrain_group_ = OGRE_NEW TerrainGroup(scene_manager, Terrain::ALIGN_X_Z, TERRAIN_SIZE, TERRAIN_WORLD_SIZE);
+	terrain_group_ = OGRE_NEW TerrainGroup(scene_manager_, Terrain::ALIGN_X_Z, TERRAIN_SIZE, TERRAIN_WORLD_SIZE);
 	terrain_group_->setFilenameConvention(TERRAIN_FILE_PREFIX, TERRAIN_FILE_SUFFIX);
 	terrain_group_->setOrigin(terrain_pos_);
 
-	configureTerrainDefaults(scene_manager, l);
+	configureTerrainDefaults(scene_manager_, l);
 
 	for (long x = TERRAIN_PAGE_MIN_X; x <= TERRAIN_PAGE_MAX_X; ++x)
 		for (long y = TERRAIN_PAGE_MIN_Y; y <= TERRAIN_PAGE_MAX_Y; ++y)
@@ -368,25 +290,20 @@ void SceneTerrain::setupContent(SceneManager* scene_manager, Light* l, Camera* c
 
 	terrain_group_->freeTemporaryResources();
 	saveTerrains(true);
-	TerrainMaterialGeneratorA::SM2Profile* mat_profile = 
-		static_cast<TerrainMaterialGeneratorA::SM2Profile*>(terrain_globals_->getDefaultMaterialGenerator()->getActiveProfile());
-	mat_profile->setReceiveDynamicShadowsEnabled(true);
-
-	mat_profile->setReceiveDynamicShadowsLowLod(false);
 
 	// General scene setup
-	scene_manager->setShadowTechnique(SHADOWTYPE_TEXTURE_ADDITIVE_INTEGRATED);
-	scene_manager->setShadowFarDistance(3000);
+	scene_manager_->setShadowTechnique(SHADOWTYPE_TEXTURE_ADDITIVE_INTEGRATED);
+	scene_manager_->setShadowFarDistance(3000);
 
 	// 3 textures per directional light (PSSM)
-	scene_manager->setShadowTextureCountPerLightType(Ogre::Light::LT_DIRECTIONAL, 3);
+	scene_manager_->setShadowTextureCountPerLightType(Ogre::Light::LT_DIRECTIONAL, 3);
 
 	if (pssm_setup_.isNull())
 	{
-		// shadow camera setup
+		// shadow camera_ setup
 		PSSMShadowCameraSetup* pssmSetup = new PSSMShadowCameraSetup();
-		pssmSetup->setSplitPadding(camera->getNearClipDistance());
-		pssmSetup->calculateSplitPoints(3, camera->getNearClipDistance(), scene_manager->getShadowFarDistance());
+		pssmSetup->setSplitPadding(camera_->getNearClipDistance());
+		pssmSetup->calculateSplitPoints(3, camera_->getNearClipDistance(), scene_manager_->getShadowFarDistance());
 		pssmSetup->setOptimalAdjustFactor(0, 2);
 		pssmSetup->setOptimalAdjustFactor(1, 1);
 		pssmSetup->setOptimalAdjustFactor(2, 0.5);
@@ -394,14 +311,14 @@ void SceneTerrain::setupContent(SceneManager* scene_manager, Light* l, Camera* c
 		pssm_setup_.bind(pssmSetup);
 
 	}
-	scene_manager->setShadowCameraSetup(pssm_setup_);
+	scene_manager_->setShadowCameraSetup(pssm_setup_);
 
-	scene_manager->setShadowTextureCount(3);
-	scene_manager->setShadowTextureConfig(0, 2048, 2048, PF_FLOAT32_R);
-	scene_manager->setShadowTextureConfig(1, 1024, 1024, PF_FLOAT32_R);
-	scene_manager->setShadowTextureConfig(2, 1024, 1024, PF_FLOAT32_R);
-	scene_manager->setShadowTextureSelfShadow(true);
-	scene_manager->setShadowCasterRenderBackFaces(true);
+	scene_manager_->setShadowTextureCount(3);
+	scene_manager_->setShadowTextureConfig(0, 2048, 2048, PF_FLOAT32_R);
+	scene_manager_->setShadowTextureConfig(1, 1024, 1024, PF_FLOAT32_R);
+	scene_manager_->setShadowTextureConfig(2, 1024, 1024, PF_FLOAT32_R);
+	scene_manager_->setShadowTextureSelfShadow(true);
+	scene_manager_->setShadowCasterRenderBackFaces(true);
 
 	Vector4 splitPoints;
 	const PSSMShadowCameraSetup::SplitPointList& splitPointList = 
@@ -410,15 +327,83 @@ void SceneTerrain::setupContent(SceneManager* scene_manager, Light* l, Camera* c
 	{
 		splitPoints[i] = splitPointList[i];
 	}
+	TerrainMaterialGeneratorA::SM2Profile* mat_profile = 
+		static_cast<TerrainMaterialGeneratorA::SM2Profile*>(terrain_globals_->getDefaultMaterialGenerator()->getActiveProfile());
+	mat_profile->setReceiveDynamicShadowsEnabled(true);
+
+	mat_profile->setReceiveDynamicShadowsLowLod(false);
 	GpuSharedParametersPtr p = GpuProgramManager::getSingleton().getSharedParameters("pssm_params");
 	p->setNamedConstant("pssmSplitPoints", splitPoints);
 
 	mat_profile->setReceiveDynamicShadowsDepth(true);
 	mat_profile->setReceiveDynamicShadowsPSSM(static_cast<PSSMShadowCameraSetup*>(pssm_setup_.get()));
+
+	//camera_controller_ = new CameraController(camera_);
+
+	character_ = new Character(this);
 }
 
-void SceneTerrain::shutdown()
+void Scene::shutdown(Ogre::Root* root)
 {
+	scene_manager_->clearScene();
+	root->destroySceneManager(scene_manager_);
+	scene_manager_ = NULL;
+
+	if (camera_controller_ != NULL) {
+		delete(camera_controller_);
+		camera_controller_ = NULL;
+	}
+
+	delete character_;
+	character_ = NULL;
 	OGRE_DELETE terrain_group_;
 	OGRE_DELETE terrain_globals_;
+}
+
+bool Scene::keyPressed(const OIS::KeyEvent& evt) {
+	if (camera_controller_ != NULL)
+		camera_controller_->injectKeyDown(evt);
+
+	character_->injectKeyDown(evt);
+	return true;
+}
+
+bool Scene::keyReleased(const OIS::KeyEvent& evt) {
+	if (camera_controller_ != NULL)
+		camera_controller_->injectKeyUp(evt);
+
+	character_->injectKeyUp(evt);
+	return true;
+}
+
+bool Scene::mousePressed(const OIS::MouseEvent& evt, OIS::MouseButtonID id) {
+	if (camera_controller_ != NULL)
+		camera_controller_->injectMouseDown(evt, id);
+
+	character_->injectMouseDown(evt, id);
+	return true;
+}
+
+bool Scene::mouseReleased(const OIS::MouseEvent& evt, OIS::MouseButtonID id) {
+	if (camera_controller_ != NULL)
+		camera_controller_->injectMouseUp(evt, id);
+
+	character_->injectMouseUp(evt, id);
+	return true;
+}
+
+bool Scene::mouseMoved(const OIS::MouseEvent& evt) {
+	if (camera_controller_ != NULL)
+		camera_controller_->injectMouseMove(evt);
+
+	character_->injectMouseMove(evt);
+	return true;
+}
+
+bool Scene::frameRenderingQueued(const Ogre::FrameEvent& evt) {
+	if (camera_controller_ != NULL)
+		camera_controller_->frameRenderingQueued(evt);
+
+	character_->addTime(evt.timeSinceLastFrame);
+	return true;
 }
