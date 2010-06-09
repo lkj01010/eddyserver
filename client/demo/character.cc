@@ -267,7 +267,7 @@ void Character::updateBody(Real deltaTime)
 
 		TerrainGroup::RayResult ray_result = scene_->terrain_group()->rayIntersects(ray);
 
-		if (pos.y <= ray_result.position.y + kCharHeight)
+		if (pos.y <= ray_result.position.y + kCharHeight && vertical_velocity_ <= 0)
 		{
 			// if we've hit the ground, change to landing state
 			pos.y = ray_result.position.y + kCharHeight;
@@ -409,12 +409,21 @@ void Character::fadeAnimations(Real deltaTime)
 
 void Character::updateCamera(Real deltaTime)
 {
+
 	// place the camera pivot roughly at the character's shoulder
 	camera_pivot_->setPosition(body_node_->getPosition() + Vector3::UNIT_Y * kCamHeight);
 	// move the camera smoothly to the goal
 	Vector3 goalOffset = camera_goal_->_getDerivedPosition() - camera_node_->getPosition();
 	camera_node_->translate(goalOffset * deltaTime * 9.0f);
 	// always look at the pivot
+	Vector3 pos = camera_node_->_getDerivedPosition();
+	Ogre::Real height = scene_->terrain_group()->getHeightAtWorldPosition(pos);
+	height += kCamHeight;
+	if (height > pos.y)
+	{
+		pos.y = height;
+		camera_node_->_setDerivedPosition(pos);
+	}
 	camera_node_->lookAt(camera_pivot_->_getDerivedPosition(), Node::TS_WORLD);
 }
 
