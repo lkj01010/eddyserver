@@ -56,12 +56,22 @@ void Character::injectKeyDown(const OIS::KeyEvent& evt)
 	else if (evt.key == OIS::KC_S) key_direction_.z = 1;
 	else if (evt.key == OIS::KC_D) key_direction_.x = 1;
 
-	else if (evt.key == OIS::KC_SPACE && (top_anim_id_ == ANIM_IDLE_TOP || top_anim_id_ == ANIM_RUN_TOP))
+	else if (evt.key == OIS::KC_SPACE )
 	{
-		// jump if on ground
-		setBaseAnimation(ANIM_JUMP_START, true);
-		setTopAnimation(ANIM_NONE);
-		timer_ = 0;
+		if (top_anim_id_ == ANIM_IDLE_TOP || top_anim_id_ == ANIM_RUN_TOP)
+		{
+			// jump if on ground
+			setBaseAnimation(ANIM_JUMP_START, true);
+			setTopAnimation(ANIM_NONE);
+			timer_ = 0;
+		} 
+		else if (base_anim_id_ == ANIM_JUMP_LOOP && !two_step_jumping_) 
+		{
+			two_step_jumping_ = true;
+			setBaseAnimation(ANIM_JUMP_START, false);
+			setTopAnimation(ANIM_NONE);
+			timer_ = 0;
+		}
 	}
 
 	if (!key_direction_.isZeroLength() && base_anim_id_ == ANIM_IDLE_BASE)
@@ -175,6 +185,7 @@ void Character::setupAnimations()
 	anims_[ANIM_HANDS_RELAXED]->setEnabled(true);
 
 	swords_drawn_ = false;
+	two_step_jumping_ = false;
 }
 
 void Character::setupCamera()
@@ -230,7 +241,7 @@ void Character::updateBody(Real deltaTime)
 		body_node_->translate(0, 0, deltaTime * kRunSpeed * anims_[base_anim_id_]->getWeight(),
 			Node::TS_LOCAL);
 
-		if (base_anim_id_ != ANIM_JUMP_LOOP) {
+		if (base_anim_id_ != ANIM_JUMP_LOOP && base_anim_id_ != ANIM_JUMP_START) {
 			Vector3 pos = body_node_->getPosition();
 			Ray ray;
 			ray.setOrigin(Vector3(pos.x, 10000, pos.z));
@@ -263,6 +274,7 @@ void Character::updateBody(Real deltaTime)
 			body_node_->setPosition(pos);
 			setBaseAnimation(ANIM_JUMP_END, true);
 			timer_ = 0;
+			two_step_jumping_ = false;
 		}
 	}
 }

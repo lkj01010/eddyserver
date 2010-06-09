@@ -7,8 +7,8 @@
 namespace CharacterPrivate
 {
 	const float kTurnSpeed = 500.0f;      // character turning in degrees per second
-	const float kAnimFadeSpeed = 7.5f;   // animation crossfade speed in % of full weight per second
-	const float kJumpAccel = 30.0f;   // character jump acceleration in upward units per squared second
+	const float kAnimFadeSpeed = 15.0f;   // animation crossfade speed in % of full weight per second
+	const float kJumpAccel = 40.0f;   // character jump acceleration in upward units per squared second
 	const float kGravity = 90.0f;          // gravity in downward units per squared second
 	const float kCharHeight	= 5.0f;          // height of character's center of mass above ground
 
@@ -99,6 +99,7 @@ private:
 	bool fading_in_[CharacterPrivate::kNumAnims];            // which animations are fading in
 	bool fading_out_[CharacterPrivate::kNumAnims];           // which animations are fading out
 	bool swords_drawn_;
+	bool two_step_jumping_;
 	Ogre::Vector3 key_direction_;      // player's local intended direction based on WASD keys
 	Ogre::Vector3 goal_direction_;     // actual intended direction in world-space
 	Ogre::Real vertical_velocity_;     // for jumping
