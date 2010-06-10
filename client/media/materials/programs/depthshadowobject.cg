@@ -43,6 +43,11 @@ VS_OUT main_vp(
 	float4   pos	: POSITION,     
     float3   normal	: NORMAL,    
     float4   uv0	: TEXCOORD0,
+#if FOUR_WEIGHTS_SKINNING
+	float4 blendIdx : BLENDINDICES,
+	float4 blendWgt : BLENDWEIGHT,
+
+#endif
 
    	uniform float4x4 worldViewProj,
 	uniform float4 lightPosition,
@@ -62,13 +67,31 @@ VS_OUT main_vp(
 	, uniform float4x4 texWorldViewProjMatrix1
 	, uniform float4x4 texWorldViewProjMatrix2
 #endif
-
+#if FOUR_WEIGHTS_SKINNING
+	, uniform float3x4   worldMatrix3x4Array[24]
+#endif
 	)
 {
     VS_OUT outp;
-
+#if FOUR_WEIGHTS_SKINNING
+	// transform by indexed matrix
+	float4 blendPos = float4(0,0,0,0);
+	int i;
+	for (i = 0; i < 4; ++i)
+	{
+		blendPos += float4(mul(worldMatrix3x4Array[blendIdx[i]], pos).xyz, 1.0) * blendWgt[i];
+	}
+	// transform normal
+	float3 norm = float3(0,0,0);
+	for (i = 0; i < 4; ++i)
+	{
+		norm += mul((float3x3)worldMatrix3x4Array[blendIdx[i]], normal) * blendWgt[i];
+	}
+	normal = normalize(norm);
+#endif
     // project position to the screen
     outp.pos = mul(worldViewProj, pos);
+
 
 #if !SHADOWCASTER
 	// Get object space light direction

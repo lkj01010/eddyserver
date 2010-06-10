@@ -241,7 +241,7 @@ void Scene::setupContent(Ogre::Root* root)
 	// scene manager
 	scene_manager_ = root->createSceneManager(Ogre::ST_GENERIC);
 
-	scene_manager_->setFog(Ogre::FOG_LINEAR, ColourValue(0.7, 0.7, 0.8), 0, 10000, 25000);
+	scene_manager_->setFog(Ogre::FOG_LINEAR, ColourValue(0.7, 0.7, 0.8), 0, 10000, 20000);
 	scene_manager_->setSkyBox(true, "CloudyNoonSkyBox");
 
 	Vector3 lightdir(-0.55, -0.4, -0.75);
@@ -260,8 +260,8 @@ void Scene::setupContent(Ogre::Root* root)
 	viewport->setBackgroundColour(ColourValue(1.0f, 1.0f, 0.8f));
 	camera_->setAspectRatio((Ogre::Real)viewport->getActualWidth() 
 		/ (Ogre::Real)viewport->getActualHeight());
-	camera_->setNearClipDistance(0.1);
-	camera_->setFarClipDistance(20000);
+	camera_->setNearClipDistance(3);
+	camera_->setFarClipDistance(10000);
 
 	// terrain
 	terrain_globals_ = OGRE_NEW Ogre::TerrainGlobalOptions();
@@ -293,7 +293,7 @@ void Scene::setupContent(Ogre::Root* root)
 
 	// General scene setup
 	scene_manager_->setShadowTechnique(SHADOWTYPE_TEXTURE_ADDITIVE_INTEGRATED);
-	scene_manager_->setShadowFarDistance(3000);
+	scene_manager_->setShadowFarDistance(1000);
 
 	// 3 textures per directional light (PSSM)
 	scene_manager_->setShadowTextureCountPerLightType(Ogre::Light::LT_DIRECTIONAL, 3);
@@ -304,9 +304,9 @@ void Scene::setupContent(Ogre::Root* root)
 		PSSMShadowCameraSetup* pssmSetup = new PSSMShadowCameraSetup();
 		pssmSetup->setSplitPadding(camera_->getNearClipDistance());
 		pssmSetup->calculateSplitPoints(3, camera_->getNearClipDistance(), scene_manager_->getShadowFarDistance());
-		pssmSetup->setOptimalAdjustFactor(0, 2);
-		pssmSetup->setOptimalAdjustFactor(1, 1);
-		pssmSetup->setOptimalAdjustFactor(2, 0.5);
+		pssmSetup->setOptimalAdjustFactor(0, 4);
+		pssmSetup->setOptimalAdjustFactor(1, 2);
+		pssmSetup->setOptimalAdjustFactor(2, 1);
 
 		pssm_setup_.bind(pssmSetup);
 

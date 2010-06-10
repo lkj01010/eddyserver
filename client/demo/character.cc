@@ -144,6 +144,7 @@ void Character::setupBody()
 	sword_trail_->setMaterialName("LightRibbonTrail");
 	sword_trail_->setTrailLength(20);
 	sword_trail_->setVisible(false);
+	sword_trail_->setCastShadows(false);
 	sceneMgr->getRootSceneNode()->attachObject(sword_trail_);
 
 
@@ -157,6 +158,10 @@ void Character::setupBody()
 
 	key_direction_ = Vector3::ZERO;
 	vertical_velocity_ = 0;
+
+	Pass* pass = body_->getSubEntity(0)->getMaterial()->getBestTechnique()->getPass(0);
+	//assert(pass->hasVertexProgram());
+	//assert(pass->getVertexProgram()->isSkeletalAnimationIncluded());
 }
 
 void Character::setupAnimations()
@@ -444,7 +449,7 @@ void Character::updateCameraGoal(Real deltaYaw, Real deltaPitch, Real deltaZoom)
 
 	// bound the zoom
 	if (!(dist + distChange < 8 && distChange < 0) &&
-		!(dist + distChange > 25 && distChange > 0))
+		!(dist + distChange > 70 && distChange > 0))
 	{
 		camera_goal_->translate(0, 0, distChange, Node::TS_LOCAL);
 	}
@@ -493,5 +498,3 @@ void Character::setTopAnimation(AnimID id, bool reset)
 		if (reset) anims_[id]->setTimePosition(0);
 	}
 }
-
-

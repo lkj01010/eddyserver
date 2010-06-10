@@ -1,3 +1,5 @@
+import * from "pssm.material"
+
 material Sinbad/Body : Ogre/shadow/depth/integrated/pssm
 {
 	receive_shadows on
