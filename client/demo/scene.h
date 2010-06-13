@@ -2,6 +2,7 @@
 #define __Scene_H__
 
 //#define PAGING
+#include "boost/shared_ptr.hpp"
 #include "OIS/OIS.h"
 
 #include "OGRE/OgreRenderSystemCapabilities.h"
@@ -19,6 +20,13 @@ namespace Ogre {
 }
 
 class Character;
+class OgreBulletHeightfield;
+
+class btBroadphaseInterface;
+class btCollisionDispatcher;
+class btConstraintSolver;
+class btDynamicsWorld;
+class btDefaultCollisionConfiguration;
 
 class Scene
 {
@@ -54,16 +62,25 @@ public:
 
 	Ogre::TerrainGroup* terrain_group() const { return terrain_group_; }
 
+	btDynamicsWorld* dynamic_world() const { return dynamic_world_.get(); }
 private:
+	void initPhysics();
+
 	Ogre::TerrainGlobalOptions*		terrain_globals_;
 	Ogre::TerrainGroup*					terrain_group_;
 	Ogre::Vector3							terrain_pos_;
 	Ogre::SceneManager*				scene_manager_;
 	Ogre::Camera*							camera_;
+	CameraController*					camera_controller_;
 	Character*								character_;
-
-	CameraController*	camera_controller_;
 	Ogre::ShadowCameraSetupPtr pssm_setup_;
+
+	boost::shared_ptr<OgreBulletHeightfield>	physics_terrain_;
+	boost::shared_ptr<btBroadphaseInterface>	overlapping_pair_cache_;
+	boost::shared_ptr<btCollisionDispatcher>		dispatcher_;
+	boost::shared_ptr<btConstraintSolver>			constraint_solver_;
+	boost::shared_ptr<btDynamicsWorld>			dynamic_world_;
+	boost::shared_ptr<btDefaultCollisionConfiguration> collision_configuration_;
 
 	void defineTerrain(long x, long y, bool flat = false);
 

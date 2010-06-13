@@ -1,5 +1,7 @@
 #include "scene.h"
 
+#include "boost/make_shared.hpp"
+
 #include "OGRE/OgreMaterialManager.h"
 #include "OGRE/OgreGpuProgramManager.h"
 #include "OGRE/OgreShadowCameraSetupPSSM.h"
@@ -8,7 +10,13 @@
 #include "OGRE/Terrain/OgreTerrainGroup.h"
 #include "OGRE/Terrain/OgreTerrainMaterialGeneratorA.h"
 
+#include "BulletCollision/BroadphaseCollision/btAxisSweep3.h"
+
+#include "btBulletDynamicsCommon.h"
+#include "BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h"
+
 #include "character.h"
+#include "ogre_bullet_heightfield.h"
 
 #define TERRAIN_PAGE_MIN_X 0
 #define TERRAIN_PAGE_MIN_Y 0
@@ -340,7 +348,56 @@ void Scene::setupContent(Ogre::Root* root)
 
 	//camera_controller_ = new CameraController(camera_);
 
+	initPhysics();
 	character_ = new Character(this);
+}
+
+void Scene::initPhysics()
+{
+	using namespace boost;
+	collision_configuration_ = make_shared<btDefaultCollisionConfiguration>();
+	dispatcher_ = shared_ptr<btCollisionDispatcher>(new btCollisionDispatcher((collision_configuration_.get())));
+	btVector3 worldMin(-5000,-5000,-5000);
+	btVector3 worldMax(5000,5000,5000);
+	overlapping_pair_cache_ = shared_ptr<btAxisSweep3>(new btAxisSweep3(worldMin,worldMax));
+
+	constraint_solver_ = make_shared<btSequentialImpulseConstraintSolver>();
+	dynamic_world_ = shared_ptr<btDynamicsWorld>(new btDiscreteDynamicsWorld(dispatcher_.get(),overlapping_pair_cache_.get(),constraint_solver_.get(),collision_configuration_.get()));
+
+	physics_terrain_ = shared_ptr<OgreBulletHeightfield>(new OgreBulletHeightfield(
+		TERRAIN_SIZE, TERRAIN_SIZE,
+		terrain_group_->getTerrain(0, 0)->getHeightData(),
+		1.0f,
+		-600.0f, 600.0f,
+		1, PHY_FLOAT, false));
+
+	// scale the shape
+	physics_terrain_->setLocalScaling(btVector3(TERRAIN_WORLD_SIZE / (TERRAIN_SIZE - 1), 
+		1.0, TERRAIN_WORLD_SIZE / (TERRAIN_SIZE - 1)));
+
+	// set origin to middle of heightfield
+	btTransform tr;
+	tr.setIdentity();
+	tr.setOrigin(btVector3(0,0,0));
+
+	// create ground object
+	float mass = 0.0;
+
+
+	//rigidbody is dynamic if and only if mass is non zero, otherwise static
+	bool isDynamic = (mass != 0.f);
+
+	btVector3 localInertia(0,0,0);
+	if (isDynamic)
+		physics_terrain_->calculateLocalInertia(mass,localInertia);
+
+	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+
+	btRigidBody* body = new btRigidBody(mass,0,physics_terrain_.get(),localInertia);	
+	body->setWorldTransform(tr);
+
+	dynamic_world_->addRigidBody(body);
+
 }
 
 void Scene::shutdown(Ogre::Root* root)
@@ -361,6 +418,24 @@ void Scene::shutdown(Ogre::Root* root)
 }
 
 bool Scene::keyPressed(const OIS::KeyEvent& evt) {
+	Ogre::PolygonMode pm;
+	if (evt.key == OIS::KC_F5)   // cycle polygon rendering mode
+	{
+		switch (camera_->getPolygonMode())
+		{
+		case Ogre::PM_SOLID:
+			pm = Ogre::PM_WIREFRAME;
+			break;
+		case Ogre::PM_WIREFRAME:
+			pm = Ogre::PM_POINTS;
+			break;
+		default:
+			pm = Ogre::PM_SOLID;
+		}
+
+		camera_->setPolygonMode(pm);
+	}
+
 	if (camera_controller_ != NULL)
 		camera_controller_->injectKeyDown(evt);
 

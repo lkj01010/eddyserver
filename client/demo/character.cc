@@ -4,6 +4,8 @@
 #include "OGRE/Terrain/OgreTerrain.h"
 #include "OGRE/Terrain/OgreTerrainGroup.h"
 
+#include "btBulletDynamicsCommon.h"
+
 using namespace Ogre;
 using namespace CharacterPrivate;
 
@@ -122,13 +124,18 @@ void Character::setupBody()
 	body_node_ = sceneMgr->getRootSceneNode()->createChildSceneNode(Vector3::UNIT_Y * kCharHeight);
 	body_ = sceneMgr->createEntity("SinbadBody", "Sinbad.mesh");
 	body_node_->attachObject(body_);
-	Ray ray;
-	ray.setOrigin(Vector3(0, 10000, 0));
-	ray.setDirection(Vector3::NEGATIVE_UNIT_Y);
 
-	TerrainGroup::RayResult ray_result = scene_->terrain_group()->rayIntersects(ray);
+	const Vector3& pos = body_node_->_getDerivedPosition();
 
-	body_node_->setPosition(ray_result.position + Vector3(0, kCharHeight, 10));
+	btCollisionWorld::ClosestRayResultCallback callback(btVector3(pos.x, 5000.0, pos.z), btVector3(pos.x, -5000.0, pos.z));
+
+	callback.m_closestHitFraction = 1.0;
+	scene_->dynamic_world()->rayTest (btVector3(pos.x, 5000.0, pos.z), btVector3(pos.x, -5000.0, pos.z), callback);
+	if (callback.hasHit())
+	{
+		body_node_->setPosition(Vector3(callback.m_hitPointWorld.x(), callback.m_hitPointWorld.y(), callback.m_hitPointWorld.z()) + Vector3(0, kCharHeight, 10));
+	}
+
 
 	// create swords and attach to sheath
 	sword1_ = sceneMgr->createEntity("SinbadSword1", "Sword.mesh");
@@ -248,14 +255,27 @@ void Character::updateBody(Real deltaTime)
 
 		if (base_anim_id_ != ANIM_JUMP_LOOP && base_anim_id_ != ANIM_JUMP_START) {
 			Vector3 pos = body_node_->getPosition();
-			Ray ray;
-			ray.setOrigin(Vector3(pos.x, 10000, pos.z));
-			ray.setDirection(Vector3::NEGATIVE_UNIT_Y);
 
-			TerrainGroup::RayResult ray_result = scene_->terrain_group()->rayIntersects(ray);
+			btCollisionWorld::ClosestRayResultCallback callback(btVector3(pos.x, 5000.0, pos.z), btVector3(pos.x, -5000.0, pos.z));
 
-			if (ray_result.hit)
-				body_node_->setPosition(pos.x, ray_result.position.y + kCharHeight, pos.z);
+			callback.m_closestHitFraction = 1.0;
+			scene_->dynamic_world()->rayTest (btVector3(pos.x, 5000.0, pos.z), btVector3(pos.x, -5000.0, pos.z), callback);
+			if (callback.hasHit())
+			{
+				pos.y = callback.m_hitPointWorld[1] + kCharHeight;
+				std::cout << "set pos:" << pos << std::endl;
+				body_node_->setPosition(pos);
+			}
+			
+			{
+				Vector3 pos = body_node_->_getDerivedPosition();
+				Ogre::Real height = scene_->terrain_group()->getHeightAtWorldPosition(pos);
+				pos.y = height;
+				std::cout << "ogre pos:" << pos << std::endl;
+				std::cout << "bullet pos:" << callback.m_hitPointWorld.x() << ","
+					<< callback.m_hitPointWorld.y() << ","
+					<< callback.m_hitPointWorld.z() << std::endl;
+			}
 		}
 	}
 
@@ -266,16 +286,16 @@ void Character::updateBody(Real deltaTime)
 		vertical_velocity_ -= kGravity * deltaTime;
 
 		Vector3 pos = body_node_->getPosition();
-		Ray ray;
-		ray.setOrigin(Vector3(pos.x, 10000, pos.z));
-		ray.setDirection(Vector3::NEGATIVE_UNIT_Y);
 
-		TerrainGroup::RayResult ray_result = scene_->terrain_group()->rayIntersects(ray);
+		btCollisionWorld::ClosestRayResultCallback callback(btVector3(pos.x, 5000.0, pos.z), btVector3(pos.x, -5000.0, pos.z));
 
-		if (pos.y <= ray_result.position.y + kCharHeight && vertical_velocity_ <= 0)
+		callback.m_closestHitFraction = 1.0;
+		scene_->dynamic_world()->rayTest (btVector3(pos.x, 5000.0, pos.z), btVector3(pos.x, -5000.0, pos.z), callback);
+
+		if (pos.y <= callback.m_hitPointWorld[1] + kCharHeight && vertical_velocity_ <= 0)
 		{
 			// if we've hit the ground, change to landing state
-			pos.y = ray_result.position.y + kCharHeight;
+			pos.y = callback.m_hitPointWorld[1] + kCharHeight;
 			body_node_->setPosition(pos);
 			setBaseAnimation(ANIM_JUMP_END, true);
 			timer_ = 0;
@@ -421,6 +441,7 @@ void Character::updateCamera(Real deltaTime)
 	Vector3 goalOffset = camera_goal_->_getDerivedPosition() - camera_node_->getPosition();
 	camera_node_->translate(goalOffset * deltaTime * 9.0f);
 	// always look at the pivot
+#if 0
 	Vector3 pos = camera_node_->_getDerivedPosition();
 	Ogre::Real height = scene_->terrain_group()->getHeightAtWorldPosition(pos);
 	height += kCamHeight;
@@ -429,6 +450,7 @@ void Character::updateCamera(Real deltaTime)
 		pos.y = height;
 		camera_node_->_setDerivedPosition(pos);
 	}
+#endif
 	camera_node_->lookAt(camera_pivot_->_getDerivedPosition(), Node::TS_WORLD);
 }
 

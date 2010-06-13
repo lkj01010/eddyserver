@@ -29,5 +29,7 @@ add_executable(ogretest
 	demo/scene.cc
 	demo/character.h
 	demo/character.cc
-	demo/ogretest.cc)
-target_link_libraries(ogretest ${OGRE_Terrain_LIBRARY} ${OGRE_LIBRARY} ${OIS_LIBRARY})
+	demo/ogretest.cc
+	demo/ogre_bullet_heightfield.h
+	demo/ogre_bullet_heightfield.cc)
+target_link_libraries(ogretest ${OGRE_Terrain_LIBRARY} ${OGRE_LIBRARY} ${OIS_LIBRARY} ${BULLET_LIBRARIES})
