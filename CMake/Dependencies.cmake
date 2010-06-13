@@ -73,6 +73,39 @@ endif (NOT PROTOBUF_FOUND)
 
 macro_log_feature(PROTOBUF_FOUND "protobuf" "Protobuf (general)" "http://code.google.com/p/protobuf/" FALSE "" "")
 
+find_package(Bullet)
+if (NOT BULLET_FOUND)
+	find_path(BULLET_INCLUDE_DIR NAMES "btBulletCollisionCommon.h" HINTS "${EDDY_SOURCE_DIR}/dependencies/include" PATH_SUFFIXES "")
+	find_library(BULLET_COLLISION_LIBRARY_REL NAMES "BulletCollision" HINTS ${EDDY_SOURCE_DIR}/dependencies PATH_SUFFIXES "" release relwithdebinfo minsizerel)
+	find_library(BULLET_COLLISION_LIBRARY_DBG NAMES "BulletCollision" HINTS ${EDDY_SOURCE_DIR}/dependencies PATH_SUFFIXES "" debug)
+	
+	find_library(BULLET_DYNAMICS_LIBRARY_REL NAMES "BulletDynamics" HINTS ${EDDY_SOURCE_DIR}/dependencies PATH_SUFFIXES "" release relwithdebinfo minsizerel)
+	find_library(BULLET_DYNAMICS_LIBRARY_DBG NAMES "BulletDynamics" HINTS ${EDDY_SOURCE_DIR}/dependencies PATH_SUFFIXES "" debug)
+	
+	find_library(BULLET_SOFTBODY_LIBRARY_REL NAMES "BulletSoftBody" HINTS ${EDDY_SOURCE_DIR}/dependencies PATH_SUFFIXES "" release relwithdebinfo minsizerel)
+	find_library(BULLET_SOFTBODY_LIBRARY_DBG NAMES "BulletSoftBody" HINTS ${EDDY_SOURCE_DIR}/dependencies PATH_SUFFIXES "" debug)
+	
+	find_library(LINEAR_MATH_LIBRARY_REL NAMES "LinearMath" HINTS ${EDDY_SOURCE_DIR}/dependencies PATH_SUFFIXES "" release relwithdebinfo minsizerel)
+	find_library(LINEAR_MATH_LIBRARY_DBG NAMES "LinearMath" HINTS ${EDDY_SOURCE_DIR}/dependencies PATH_SUFFIXES "" debug)
+
+	set(BULLET_LIBRARIES_REL 
+	${BULLET_COLLISION_LIBRARY_REL}
+	${BULLET_DYNAMICS_LIBRARY_REL}
+	${BULLET_SOFTBODY_LIBRARY_REL}
+	${LINEAR_MATH_LIBRARY_REL})
+	
+	set(BULLET_LIBRARIES_DBG 
+	${BULLET_COLLISION_LIBRARY_DBG}
+	${BULLET_DYNAMICS_LIBRARY_DBG}
+	${BULLET_SOFTBODY_LIBRARY_DBG}
+	${LINEAR_MATH_LIBRARY_DBG})
+
+	make_library_set(BULLET_LIBRARIES)
+	findpkg_finish(BULLET)
+endif (BULLET_FOUND)
+
+macro_log_feature(BULLET_FOUND "bullet" "bullet (general)" "http://www.bulletphysics.org/" FALSE "" "")
+
 if (EDDY_BUILD_CLIENT)
 find_package(OGRE REQUIRED)
 macro_log_feature(OGRE_FOUND "OGRE" "OGRE (general)" "http://www.ogre3d.org/" FALSE "" "") 
