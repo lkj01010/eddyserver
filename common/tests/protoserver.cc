@@ -107,7 +107,7 @@ class MyHandler : public TCPSessionHandler {
     cout << message.DebugString() << endl;;
   }
 
-  // add more messages handles here, they would be automatically registered.
+  // add more message handles here, they will be automatically registered.
 };
 
 

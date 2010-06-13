@@ -305,7 +305,7 @@ void Scene::setupContent(Ogre::Root* root)
 		pssmSetup->setSplitPadding(camera_->getNearClipDistance());
 		pssmSetup->calculateSplitPoints(3, camera_->getNearClipDistance(), scene_manager_->getShadowFarDistance());
 		pssmSetup->setOptimalAdjustFactor(0, 4);
-		pssmSetup->setOptimalAdjustFactor(1, 2);
+		pssmSetup->setOptimalAdjustFactor(1, 1);
 		pssmSetup->setOptimalAdjustFactor(2, 1);
 
 		pssm_setup_.bind(pssmSetup);
