@@ -4,6 +4,9 @@
 #include "Ogre.h"
 #include "OIS.h"
 
+class btKinematicCharacterController;
+class btPairCachingGhostObject;
+
 namespace CharacterPrivate
 {
 	const float kTurnSpeed = 500.0f;      // character turning in degrees per second
@@ -47,6 +50,8 @@ public:
 
 
 	Character(Scene* scene);
+
+	~Character();
 
 	void addTime(Ogre::Real deltaTime);
 
@@ -104,6 +109,9 @@ private:
 	Ogre::Vector3 goal_direction_;     // actual intended direction in world-space
 	Ogre::Real vertical_velocity_;     // for jumping
 	Ogre::Real timer_;                // general timer to see how long animations have been playing
+
+	btKinematicCharacterController* controller_;
+	btPairCachingGhostObject*	ghost_object_;
 };
 
 #endif

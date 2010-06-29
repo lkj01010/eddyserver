@@ -368,7 +368,7 @@ void Scene::initPhysics()
 		TERRAIN_SIZE, TERRAIN_SIZE,
 		terrain_group_->getTerrain(0, 0)->getHeightData(),
 		1.0f,
-		-600.0f, 600.0f,
+		0.0f, 700.0f,
 		1, PHY_FLOAT, false));
 
 	// scale the shape
@@ -378,7 +378,7 @@ void Scene::initPhysics()
 	// set origin to middle of heightfield
 	btTransform tr;
 	tr.setIdentity();
-	tr.setOrigin(btVector3(0,0,0));
+	tr.setOrigin(btVector3(0,350.0f,0));
 
 	// create ground object
 	float mass = 0.0;
@@ -479,6 +479,7 @@ bool Scene::frameRenderingQueued(const Ogre::FrameEvent& evt) {
 	if (camera_controller_ != NULL)
 		camera_controller_->frameRenderingQueued(evt);
 
+	dynamic_world_->stepSimulation(evt.timeSinceLastFrame);
 	character_->addTime(evt.timeSinceLastFrame);
 	return true;
 }

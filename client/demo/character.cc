@@ -5,6 +5,8 @@
 #include "OGRE/Terrain/OgreTerrainGroup.h"
 
 #include "btBulletDynamicsCommon.h"
+#include "BulletDynamics/Character/btKinematicCharacterController.h"
+#include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
 using namespace Ogre;
 using namespace CharacterPrivate;
@@ -15,6 +17,15 @@ Character::Character(Scene* scene)
 	setupBody();
 	setupCamera();
 	setupAnimations();
+}
+
+Character::~Character()
+{
+	if (controller_)
+		delete controller_;
+
+	if (ghost_object_)
+		delete ghost_object_;
 }
 
 void Character::addTime(Real deltaTime)
@@ -127,10 +138,10 @@ void Character::setupBody()
 
 	const Vector3& pos = body_node_->_getDerivedPosition();
 
-	btCollisionWorld::ClosestRayResultCallback callback(btVector3(pos.x, 5000.0, pos.z), btVector3(pos.x, -5000.0, pos.z));
+	btCollisionWorld::ClosestRayResultCallback callback(btVector3(pos.x, 700.0, pos.z), btVector3(pos.x, -700.0, pos.z));
 
 	callback.m_closestHitFraction = 1.0;
-	scene_->dynamic_world()->rayTest (btVector3(pos.x, 5000.0, pos.z), btVector3(pos.x, -5000.0, pos.z), callback);
+	scene_->dynamic_world()->rayTest (btVector3(pos.x, 700.0, pos.z), btVector3(pos.x, -700.0, pos.z), callback);
 	if (callback.hasHit())
 	{
 		body_node_->setPosition(Vector3(callback.m_hitPointWorld.x(), callback.m_hitPointWorld.y(), callback.m_hitPointWorld.z()) + Vector3(0, kCharHeight, 10));
@@ -165,10 +176,6 @@ void Character::setupBody()
 
 	key_direction_ = Vector3::ZERO;
 	vertical_velocity_ = 0;
-
-	Pass* pass = body_->getSubEntity(0)->getMaterial()->getBestTechnique()->getPass(0);
-	//assert(pass->hasVertexProgram());
-	//assert(pass->getVertexProgram()->isSkeletalAnimationIncluded());
 }
 
 void Character::setupAnimations()
@@ -256,17 +263,17 @@ void Character::updateBody(Real deltaTime)
 		if (base_anim_id_ != ANIM_JUMP_LOOP && base_anim_id_ != ANIM_JUMP_START) {
 			Vector3 pos = body_node_->getPosition();
 
-			btCollisionWorld::ClosestRayResultCallback callback(btVector3(pos.x, 5000.0, pos.z), btVector3(pos.x, -5000.0, pos.z));
+			btCollisionWorld::ClosestRayResultCallback callback(btVector3(pos.x, 700.0, pos.z), btVector3(pos.x, -700.0, pos.z));
 
 			callback.m_closestHitFraction = 1.0;
-			scene_->dynamic_world()->rayTest (btVector3(pos.x, 5000.0, pos.z), btVector3(pos.x, -5000.0, pos.z), callback);
+			scene_->dynamic_world()->rayTest (btVector3(pos.x, 700.0, pos.z), btVector3(pos.x, -700.0, pos.z), callback);
 			if (callback.hasHit())
 			{
 				pos.y = callback.m_hitPointWorld[1] + kCharHeight;
-				std::cout << "set pos:" << pos << std::endl;
 				body_node_->setPosition(pos);
 			}
 			
+#if 0
 			{
 				Vector3 pos = body_node_->_getDerivedPosition();
 				Ogre::Real height = scene_->terrain_group()->getHeightAtWorldPosition(pos);
@@ -276,6 +283,7 @@ void Character::updateBody(Real deltaTime)
 					<< callback.m_hitPointWorld.y() << ","
 					<< callback.m_hitPointWorld.z() << std::endl;
 			}
+#endif
 		}
 	}
 
@@ -287,10 +295,10 @@ void Character::updateBody(Real deltaTime)
 
 		Vector3 pos = body_node_->getPosition();
 
-		btCollisionWorld::ClosestRayResultCallback callback(btVector3(pos.x, 5000.0, pos.z), btVector3(pos.x, -5000.0, pos.z));
+		btCollisionWorld::ClosestRayResultCallback callback(btVector3(pos.x, 700.0, pos.z), btVector3(pos.x, -700.0, pos.z));
 
 		callback.m_closestHitFraction = 1.0;
-		scene_->dynamic_world()->rayTest (btVector3(pos.x, 5000.0, pos.z), btVector3(pos.x, -5000.0, pos.z), callback);
+		scene_->dynamic_world()->rayTest (btVector3(pos.x, 700.0, pos.z), btVector3(pos.x, -700.0, pos.z), callback);
 
 		if (pos.y <= callback.m_hitPointWorld[1] + kCharHeight && vertical_velocity_ <= 0)
 		{
@@ -434,14 +442,12 @@ void Character::fadeAnimations(Real deltaTime)
 
 void Character::updateCamera(Real deltaTime)
 {
-
 	// place the camera pivot roughly at the character's shoulder
 	camera_pivot_->setPosition(body_node_->getPosition() + Vector3::UNIT_Y * kCamHeight);
 	// move the camera smoothly to the goal
 	Vector3 goalOffset = camera_goal_->_getDerivedPosition() - camera_node_->getPosition();
 	camera_node_->translate(goalOffset * deltaTime * 9.0f);
 	// always look at the pivot
-#if 0
 	Vector3 pos = camera_node_->_getDerivedPosition();
 	Ogre::Real height = scene_->terrain_group()->getHeightAtWorldPosition(pos);
 	height += kCamHeight;
@@ -450,7 +456,7 @@ void Character::updateCamera(Real deltaTime)
 		pos.y = height;
 		camera_node_->_setDerivedPosition(pos);
 	}
-#endif
+
 	camera_node_->lookAt(camera_pivot_->_getDerivedPosition(), Node::TS_WORLD);
 }
 
