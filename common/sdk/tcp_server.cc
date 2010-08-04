@@ -41,6 +41,7 @@ TCPServer::TCPServer(const tcp::endpoint& endpoint,
     session_filter_creator_(session_filter_creator) {
 
       SessionPointer session(new TCPSession(io_thread_manager_, session_filter_creator_()));
+      acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
       acceptor_.async_accept(session->socket(),
                              boost::bind(&TCPServer::HandleAccept,
                                          this,
