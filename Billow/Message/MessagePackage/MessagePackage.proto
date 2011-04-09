@@ -1,0 +1,12 @@
+package Eddy.Message;
+
+// 网络消息封包
+message MessagePackage
+{
+	// 后面message的解析类型
+	required uint32 category_id = 1;
+	required uint32 type_id = 2;
+	
+	// 有效负载
+	required bytes message = 3;
+}

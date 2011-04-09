@@ -1,0 +1,70 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eddy", "Eddy\Eddy.csproj", "{B3F5C7B4-E588-4A58-85FB-9DAD7E0FEC40}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EddyTest", "EddyTest\EddyTest.csproj", "{491542CE-4B46-4CBC-A44D-86728F74B825}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B3F5C7B4-E588-4A58-85FB-9DAD7E0FEC40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3F5C7B4-E588-4A58-85FB-9DAD7E0FEC40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3F5C7B4-E588-4A58-85FB-9DAD7E0FEC40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3F5C7B4-E588-4A58-85FB-9DAD7E0FEC40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{491542CE-4B46-4CBC-A44D-86728F74B825}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{491542CE-4B46-4CBC-A44D-86728F74B825}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{491542CE-4B46-4CBC-A44D-86728F74B825}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{491542CE-4B46-4CBC-A44D-86728F74B825}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Server\Server.csproj
+		Policies = $0
+		$0.TextStylePolicy = $1
+		$1.FileWidth = 40
+		$1.TabWidth = 4
+		$1.EolMarker = Windows
+		$1.inheritsSet = Mono
+		$1.inheritsScope = text/plain
+		$1.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $2
+		$2.inheritsSet = Mono
+		$2.inheritsScope = text/x-csharp
+		$2.scope = text/x-csharp
+		$0.DotNetNamingPolicy = $3
+		$3.DirectoryNamespaceAssociation = None
+		$3.ResourceNamePolicy = FileFormatDefault
+		$0.TextStylePolicy = $4
+		$4.FileWidth = 120
+		$4.TabWidth = 4
+		$4.inheritsSet = Mono
+		$4.inheritsScope = text/plain
+		$4.scope = application/xml
+		$0.XmlFormattingPolicy = $5
+		$5.inheritsSet = Mono
+		$5.inheritsScope = application/xml
+		$5.scope = application/xml
+		$0.StandardHeader = $6
+		$6.Text = 
+		$6.inheritsSet = Apache2License
+		$0.VersionControlPolicy = $7
+		$7.inheritsSet = Mono
+		$0.ChangeLogPolicy = $8
+		$8.UpdateMode = None
+		$8.MessageStyle = $9
+		$9.LineAlign = 0
+		$8.inheritsSet = Mono
+		$0.TextStylePolicy = $10
+		$10.FileWidth = 120
+		$10.TabWidth = 4
+		$10.inheritsSet = Mono
+		$10.inheritsScope = text/plain
+		$10.scope = text/plain
+	EndGlobalSection
+EndGlobal
