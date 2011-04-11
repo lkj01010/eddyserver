@@ -13,7 +13,7 @@ namespace Eddy.Extensions
 		/// 当<see cref="XElement"/>为null，或不存在给定的属性，或给定的属性值为null时，
 		/// 都会返回<paramref name="defaultValue"/>
 		/// </summary>
-		public static string AttributeValue(this XElement my, XName name, string defaultValue = "")
+		public static string AttributeValue(this XElement my, XName name, string defaultValue)
 		{
 			if (my != null)
 			{
