@@ -1,11 +1,7 @@
-﻿using Eddy.Message;
+﻿using System.Linq;
+using Eddy.Message;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ProtoBuf;
-using System.Reflection;
-using Eddy;
-using System;
-using System.Linq;
-using Eddy.Extensions;
 
 namespace Eddy.Test
 {
