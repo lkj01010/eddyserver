@@ -46,6 +46,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoroutineTest.cs" />
     <Compile Include="MessageEncoderTest.cs" />
     <Compile Include="PackageHeadTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

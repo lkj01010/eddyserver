@@ -85,6 +85,12 @@
     <Compile Include="..\Message\MessagePackage\MessagePackage.proto.cs">
       <Link>Message\MessagePackage.proto.cs</Link>
     </Compile>
+    <Compile Include="Coroutine\Executor.cs" />
+    <Compile Include="Coroutine\ValueExtractor.cs" />
+    <Compile Include="Coroutine\Waiters\OneShotEventWaiter.cs" />
+    <Compile Include="Coroutine\Waiter.cs" />
+    <Compile Include="Coroutine\Waiters\TimeSpanWaiter.cs" />
+    <Compile Include="Coroutine\Waiters\WaiterCombiner.cs" />
     <Compile Include="DateTimeProvider.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\FormExtensions.cs" />
@@ -134,9 +140,6 @@
     <None Include="..\Message\MessagePackage\MessagePackage.proto">
       <Link>Message\MessagePackage.proto</Link>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Coroutine\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
