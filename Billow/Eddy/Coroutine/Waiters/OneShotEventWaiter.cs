@@ -28,7 +28,8 @@ namespace Eddy.Coroutine.Waiters
         {
             action = (param) =>
                 {
-                    extractor.Value = param;
+                    if (extractor != null)
+                        extractor.Value = param;
                     OnCompleted();
                 };
             oneShotEvent.Add(action);

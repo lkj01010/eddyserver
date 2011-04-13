@@ -6,8 +6,6 @@ using Eddy.Coroutine.Waiters;
 
 namespace Eddy.Coroutine
 {
-    using Controller = IEnumerator<Waiter>;
-
     public class Executor : IDisposable
     {
         private bool disposed = false;
@@ -20,19 +18,23 @@ namespace Eddy.Coroutine
 
         public Controller StartCoroutine(IEnumerable<Waiter> coroutine)
         {
-            var controller = coroutine.GetEnumerator();
-            if (!controller.MoveNext())
+            var enumerator = coroutine.GetEnumerator();
+            var controller = new Controller { Enumerator = enumerator, Executor = this };
+            if (!enumerator.MoveNext())
+            {
+                controller.OnCompleted();
                 return controller;
-            controller.Current.Completed += () => this.OnWaiterCompleted(controller);
+            }
+            enumerator.Current.Completed += () => this.OnWaiterCompleted(controller);
             this.controllers.Add(controller);
             return controller;
         }
 
         public void StopCoroutine(Controller controller)
         {
-            if (controller.Current == null)
+            if (controller.Enumerator.Current == null)
                 return;
-            controller.Current.Dispose();
+            controller.Enumerator.Current.Dispose();
             this.controllers.Remove(controller);
         }
 
@@ -57,6 +59,17 @@ namespace Eddy.Coroutine
             return new WaiterCombiner(waiters);
         }
 
+        public Waiter WaitForAny(ValueExtractor<int> index, params Waiter[] waiters)
+        {
+            return new IndexedWaiterCombiner(index, waiters);
+        }
+
+        public Waiter WaitForCoroutine(IEnumerable<Waiter> coroutine)
+        {
+            var controller = StartCoroutine(coroutine);
+            return new WaiterChain(controller);
+        }
+
         #region IDisposable Members
 
         ~Executor()
@@ -76,8 +89,10 @@ namespace Eddy.Coroutine
                 return;
             foreach (var controller in this.controllers)
             {
-                if (controller.Current != null)
-                    controller.Current.Dispose();
+                if (controller.Enumerator.Current != null)
+                {
+                    controller.Enumerator.Current.Dispose();
+                }
             }
             controllers.Clear();
             disposed = true;
@@ -86,11 +101,16 @@ namespace Eddy.Coroutine
 
         private void OnWaiterCompleted(Controller controller)
         {
-            controller.Current.Dispose();
-            if (controller.MoveNext())
-                controller.Current.Completed += () => this.OnWaiterCompleted(controller);
+            controller.Enumerator.Current.Dispose();
+            if (controller.Enumerator.MoveNext())
+            {
+                controller.Enumerator.Current.Completed += () => this.OnWaiterCompleted(controller);
+            }
             else
+            {
+                controller.OnCompleted();
                 this.controllers.Remove(controller);
+            }
         }
     }
 }

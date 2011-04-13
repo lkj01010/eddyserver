@@ -85,11 +85,14 @@
     <Compile Include="..\Message\MessagePackage\MessagePackage.proto.cs">
       <Link>Message\MessagePackage.proto.cs</Link>
     </Compile>
+    <Compile Include="Coroutine\Controller.cs" />
     <Compile Include="Coroutine\Executor.cs" />
     <Compile Include="Coroutine\ValueExtractor.cs" />
+    <Compile Include="Coroutine\Waiters\IndexedWaiterCombiner.cs" />
     <Compile Include="Coroutine\Waiters\OneShotEventWaiter.cs" />
     <Compile Include="Coroutine\Waiter.cs" />
     <Compile Include="Coroutine\Waiters\TimeSpanWaiter.cs" />
+    <Compile Include="Coroutine\Waiters\WaiterChain.cs" />
     <Compile Include="Coroutine\Waiters\WaiterCombiner.cs" />
     <Compile Include="DateTimeProvider.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
