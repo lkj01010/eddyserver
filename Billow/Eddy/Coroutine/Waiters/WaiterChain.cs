@@ -17,7 +17,7 @@ namespace Eddy.Coroutine.Waiters
             this.controller.Completed += this.OnCompleted;
         }
 
-        protected override void Cancel()
+        protected override void CleanUp()
         {
             this.controller.Completed -= this.OnCompleted;
             this.controller.Stop();

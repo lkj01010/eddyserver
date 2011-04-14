@@ -83,6 +83,11 @@ namespace Eddy.Coroutine
             GC.SuppressFinalize(this);
         }
 
+        protected int GetControllerCount()
+        { 
+            return controllers.Count; 
+        }
+
         private void Dispose(bool disposing)
         {
             if (disposed)

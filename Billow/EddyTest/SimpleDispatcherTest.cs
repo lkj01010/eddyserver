@@ -8,17 +8,11 @@ using Eddy.Timers;
 
 namespace EddyTest
 {
-    /// <summary>
-    /// Summary description for SimpleDispatcherTest
-    /// </summary>
     [TestClass]
     public class SimpleDispatcherTest
     {
         public SimpleDispatcherTest()
         {
-            //
-            // TODO: Add constructor logic here
-            //
         }
 
         private TestContext testContextInstance;
@@ -39,44 +33,28 @@ namespace EddyTest
             }
         }
 
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-         [TestCleanup()]
-        public void MyTestCleanup() { count = 0;  }
-        
-        #endregion
+        [TestCleanup()]
+        public void MyTestCleanup()
+        {
+            count = 0;
+        }
 
-         int count;
-        
+        int count;
+
         [TestMethod]
         public void TestSimpleDispatcher()
         {
             var dispatcher = SimpleDispatcher.CurrentDispatcher;
             dispatcher.Invoke(
-                () => 
-                    {
-                        count += 1;
-                        dispatcher.Invoke(() =>
-                            {
-                                count += 2;
-                                dispatcher.Shutdown();
-                            });
-                    });
+                () =>
+                {
+                    count += 1;
+                    dispatcher.Invoke(() =>
+                        {
+                            count += 2;
+                            dispatcher.Shutdown();
+                        });
+                });
             dispatcher.Run();
             Assert.AreEqual(3, count);
         }

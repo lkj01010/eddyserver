@@ -26,7 +26,7 @@ namespace Eddy.Coroutine.Waiters
             }
         }
 
-        protected override void Cancel()
+        protected override void CleanUp()
         {
             foreach (var waiter in waiters)
                 waiter.Dispose();

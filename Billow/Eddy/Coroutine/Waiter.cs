@@ -11,7 +11,7 @@ namespace Eddy.Coroutine
 
         public void Dispose()
         {
-            this.Cancel();
+            this.CleanUp();
         }
 
         protected void OnCompleted()
@@ -20,6 +20,6 @@ namespace Eddy.Coroutine
                 Completed();
         }
 
-        protected abstract void Cancel();
+        protected abstract void CleanUp();
     }
 }

@@ -14,7 +14,7 @@ namespace Eddy.Coroutine.Waiters
             this.oneShotEvent = oneShotEvent;
         }
 
-        protected override void Cancel()
+        protected override void CleanUp()
         {
             this.oneShotEvent.Remove(OnCompleted);
         }
@@ -36,7 +36,7 @@ namespace Eddy.Coroutine.Waiters
             this.oneShotEvent = oneShotEvent;
         }
 
-        protected override void Cancel()
+        protected override void CleanUp()
         {
             this.oneShotEvent.Remove(action);
         }
