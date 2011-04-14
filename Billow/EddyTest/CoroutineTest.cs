@@ -78,7 +78,7 @@ namespace EddyTest
             count += 3;
         }
 
-        private IEnumerable<Waiter> DoSomethingComplex()
+        private IEnumerable<Waiter> CombineCoroutine()
         {
             var extractor = new ValueExtractor<int>();
             yield return executor.WaitForAny(
@@ -111,12 +111,54 @@ namespace EddyTest
         [TestMethod]
         public void TestCombiner()
         {
-            executor.StartCoroutine(DoSomethingComplex());
+            executor.StartCoroutine(CombineCoroutine());
             event1.Raise();
             Assert.AreEqual(1, count);
-            executor.StartCoroutine(DoSomethingComplex());
+            executor.StartCoroutine(CombineCoroutine());
             event2.Raise(99);
             Assert.AreEqual(100, count);
+        }
+
+        private IEnumerable<Waiter> SubChainCoroutine()
+        {
+            count += 2;
+            yield return executor.WaitForOneShotEvent(event1);
+            count += 3;
+        }
+
+        private IEnumerable<Waiter> ChainCoroutine()
+        {
+            yield return executor.WaitForCoroutine(SubChainCoroutine());
+            count += 4;
+        }
+
+        [TestMethod]
+        public void TestChain()
+        {
+            executor.StartCoroutine(ChainCoroutine());
+            event1.Raise();
+            Assert.AreEqual(9, count);
+            count = 0;
+        }
+
+        private IEnumerable<Waiter> IndexedChainCoroutine(ValueExtractor<int> index)
+        {
+            yield return executor.WaitForAny(index,
+                executor.WaitForOneShotEvent(event1),
+                executor.WaitForOneShotEvent(event2, new ValueExtractor<int>()));
+        }
+
+        [TestMethod]
+        public void TestIndexedCombine()
+        {
+            var index = Executor.ExtractValue<int>();
+            executor.StartCoroutine(IndexedChainCoroutine(index));
+            event1.Raise();
+            Assert.AreEqual(0, index.Value);
+
+            executor.StartCoroutine(IndexedChainCoroutine(index));
+            event2.Raise(0);
+            Assert.AreEqual(1, index.Value);
         }
     }
 }

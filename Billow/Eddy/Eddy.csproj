@@ -78,8 +78,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\3Party\protobuf-net\net\protobuf-net.dll</HintPath>
     </Reference>
-    <Reference Include="WindowsBase">
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Message\MessagePackage\MessagePackage.proto.cs">
@@ -111,6 +109,7 @@
     <Compile Include="Net\PackageHead.cs" />
     <Compile Include="Net\PackageHeadFlags.cs" />
     <Compile Include="OneShotEvent.cs" />
+    <Compile Include="SimpleDispatcher.cs" />
     <Compile Include="Singleton.cs" />
     <Compile Include="Timers\SlotTimer.cs" />
     <Compile Include="Timers\SlotTimerNode.cs" />

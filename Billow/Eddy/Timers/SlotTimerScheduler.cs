@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Windows.Threading;
 
 namespace Eddy.Timers
 {
@@ -58,11 +57,10 @@ namespace Eddy.Timers
             this.lastFiredSlot = -1;
             this.lastFiredTime = this.startTime - this.slotInterval;
 
-            var dispatcher = Dispatcher.CurrentDispatcher;
+            var dispatcher = SimpleDispatcher.CurrentDispatcher;
             TimerCallback callback = (state) =>
                 {
-                    Action action = () => this.Update();
-                    dispatcher.BeginInvoke(DispatcherPriority.Normal, action);
+                    dispatcher.Invoke(this.Update);
                 };
             this.updateTimer = new Timer(callback, null,
             new TimeSpan(0, 0, 0, 0, slotInterval / 2), new TimeSpan(0, 0, 0, 0, slotInterval));
