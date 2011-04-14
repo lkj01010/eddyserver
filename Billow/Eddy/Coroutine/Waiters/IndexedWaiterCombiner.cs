@@ -22,7 +22,8 @@ namespace Eddy.Coroutine.Waiters
                     {
                         // 防止重复CleanUp
                         this.waiters.Remove(waiters[value]);
-                        indexGetter(value);
+                        if (indexGetter != null)
+                            indexGetter(value);
                         this.OnCompleted();
                     };
             }

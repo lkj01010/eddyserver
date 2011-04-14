@@ -17,7 +17,8 @@ namespace Eddy.Coroutine.Waiters
             this.dispatcher = dispatcher;
             this.handler = (message) =>
                 {
-                    messageGetter(message as T);
+                    if (messageGetter != null)
+                        messageGetter(message as T);
                     this.OnCompleted();
                 };
             this.dispatcher.AddHandler(typeof(T), this.handler);
