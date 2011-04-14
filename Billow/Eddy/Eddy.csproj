@@ -85,8 +85,8 @@
     </Compile>
     <Compile Include="Coroutine\Controller.cs" />
     <Compile Include="Coroutine\Executor.cs" />
-    <Compile Include="Coroutine\ValueExtractor.cs" />
     <Compile Include="Coroutine\Waiters\IndexedWaiterCombiner.cs" />
+    <Compile Include="Coroutine\Waiters\MessageWaiter.cs" />
     <Compile Include="Coroutine\Waiters\OneShotEventWaiter.cs" />
     <Compile Include="Coroutine\Waiter.cs" />
     <Compile Include="Coroutine\Waiters\TimeSpanWaiter.cs" />
@@ -100,6 +100,7 @@
     <Compile Include="Extensions\SortedListExtensions.cs" />
     <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="MD5Hash.cs" />
+    <Compile Include="Coroutine\MessageDispatcher.cs" />
     <Compile Include="Message\ExecuteAttribute.cs" />
     <Compile Include="Message\MessageSerializer.cs" />
     <Compile Include="Message\MessageTypeID.cs" />

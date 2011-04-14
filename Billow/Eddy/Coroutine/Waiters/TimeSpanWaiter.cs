@@ -19,7 +19,7 @@ namespace Eddy.Coroutine.Waiters
             timer.Start();
         }
 
-        protected override void Cancel()
+        internal override void CleanUp(bool completed)
         {
             timer.Stop();
         }

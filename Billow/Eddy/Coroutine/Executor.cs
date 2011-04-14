@@ -10,11 +10,7 @@ namespace Eddy.Coroutine
     {
         private bool disposed = false;
         private List<Controller> controllers = new List<Controller>();
-
-        public static ValueExtractor<T> ExtractValue<T>()
-        {
-            return new ValueExtractor<T>();
-        }
+        private MessageDispatcher messageDispatcher;
 
         public Controller StartCoroutine(IEnumerable<Waiter> coroutine)
         {
@@ -34,8 +30,21 @@ namespace Eddy.Coroutine
         {
             if (controller.Enumerator.Current == null)
                 return;
-            controller.Enumerator.Current.Dispose();
+            controller.Enumerator.Current.CleanUp(false);
             this.controllers.Remove(controller);
+        }
+
+        /// <summary>
+        /// 接收消息，如果内部消耗了该消息，返回null，否则把返回原消息
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public T OnMessage<T>(T message) where T : class
+        {
+            if (messageDispatcher == null)
+                return message;
+            return messageDispatcher.OnMessage(message);
         }
 
         public Waiter WaitForSeconds(float seconds)
@@ -70,6 +79,13 @@ namespace Eddy.Coroutine
             return new WaiterChain(controller);
         }
 
+        public Waiter WaitForMessage<T>(Action<T> messageGetter) where T : class
+        {
+            if (this.messageDispatcher == null)
+                this.messageDispatcher = new MessageDispatcher();
+            return new MessageWaiter<T>(this.messageDispatcher, messageGetter);
+        }
+
         #region IDisposable Members
 
         ~Executor()
@@ -96,7 +112,7 @@ namespace Eddy.Coroutine
             {
                 if (controller.Enumerator.Current != null)
                 {
-                    controller.Enumerator.Current.Dispose();
+                    controller.Enumerator.Current.CleanUp(false);
                 }
             }
             controllers.Clear();
@@ -106,7 +122,7 @@ namespace Eddy.Coroutine
 
         private void OnWaiterCompleted(Controller controller)
         {
-            controller.Enumerator.Current.Dispose();
+            controller.Enumerator.Current.CleanUp(true);
             if (controller.Enumerator.MoveNext())
             {
                 controller.Enumerator.Current.Completed += () => this.OnWaiterCompleted(controller);

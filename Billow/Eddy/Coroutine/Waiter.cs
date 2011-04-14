@@ -5,14 +5,9 @@ using System.Text;
 
 namespace Eddy.Coroutine
 {
-    public abstract class Waiter : IDisposable
+    public abstract class Waiter
     {
         public event Action Completed;
-
-        public void Dispose()
-        {
-            this.Cancel();
-        }
 
         protected void OnCompleted()
         {
@@ -20,6 +15,6 @@ namespace Eddy.Coroutine
                 Completed();
         }
 
-        protected abstract void Cancel();
+        internal abstract void CleanUp(bool completed);
     }
 }

@@ -10,26 +10,30 @@ namespace Eddy.Coroutine.Waiters
     /// </summary>
     class IndexedWaiterCombiner : Waiter
     {
-       private readonly Waiter[] waiters;
+       private readonly List<Waiter> waiters;
 
        public IndexedWaiterCombiner(Action<int> indexGetter, params Waiter[] waiters)
         {
-            this.waiters = waiters;
+            this.waiters = new List<Waiter>(waiters);
             for (int i = 0; i < waiters.Length; ++i)
             {
                 int value = i;
-                waiters[i].Completed += () =>
+                waiters[value].Completed += () =>
                     {
+                        // 防止重复CleanUp
+                        this.waiters.Remove(waiters[value]);
                         indexGetter(value);
                         this.OnCompleted();
                     };
             }
         }
 
-        protected override void Cancel()
+       internal override void CleanUp(bool completed)
         {
             foreach (var waiter in waiters)
-                waiter.Dispose();
+            {
+                waiter.CleanUp(false);
+            }
         }
     }
 }

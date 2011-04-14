@@ -10,19 +10,28 @@ namespace Eddy.Coroutine.Waiters
     /// </summary>
     internal class WaiterCombiner : Waiter
     {
-        private readonly Waiter[] waiters;
+        private readonly List<Waiter> waiters;
 
         public WaiterCombiner(params Waiter[] waiters)
         {
-            this.waiters = waiters;
+            this.waiters = new List<Waiter>(waiters);
+
             foreach (var waiter in waiters)
-                waiter.Completed += this.OnCompleted;
+            {
+                var temp = waiter;
+                waiter.Completed += () =>
+                    {
+                        // 防止重复CleanUp
+                        this.waiters.Remove(temp);
+                        this.OnCompleted();
+                    };
+            }
         }
 
-        protected override void Cancel()
+        internal override void CleanUp(bool completed)
         {
             foreach (var waiter in waiters)
-                waiter.Dispose();
+                waiter.CleanUp(false);
         }
     }
 }
