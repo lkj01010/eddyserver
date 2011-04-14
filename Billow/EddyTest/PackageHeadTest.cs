@@ -67,7 +67,7 @@ namespace Eddy.Test
 		///WriteTo 的测试
 		///</summary>
 		[TestMethod()]
-		public void WriteReadTest()
+		public void TestWriteRead()
 		{
 			PackageHead target = new PackageHead();
 			PackageHead other = new PackageHead();

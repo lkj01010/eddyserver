@@ -63,7 +63,7 @@ namespace Eddy.Test
 
 
 		[TestMethod()]
-		public void SwapTest()
+		public void TestSwap()
 		{
 			{
 				int a = 0;
