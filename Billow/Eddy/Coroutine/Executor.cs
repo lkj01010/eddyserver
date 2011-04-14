@@ -49,9 +49,9 @@ namespace Eddy.Coroutine
             return new OneShotEventWaiter(oneShotEvent);
         }
 
-        public Waiter WaitForOneShotEvent<T>(OneShotEvent<T> oneShotEvent, ValueExtractor<T> extractor)
+        public Waiter WaitForOneShotEvent<T>(OneShotEvent<T> oneShotEvent, Action<T> paramGetter)
         {
-            return new OneShotEventWaiter<T>(oneShotEvent, extractor);
+            return new OneShotEventWaiter<T>(oneShotEvent, paramGetter);
         }
 
         public Waiter WaitForAny(params Waiter[] waiters)
@@ -59,9 +59,9 @@ namespace Eddy.Coroutine
             return new WaiterCombiner(waiters);
         }
 
-        public Waiter WaitForAny(ValueExtractor<int> index, params Waiter[] waiters)
+        public Waiter WaitForAny(Action<int> indexGetter, params Waiter[] waiters)
         {
-            return new IndexedWaiterCombiner(index, waiters);
+            return new IndexedWaiterCombiner(indexGetter, waiters);
         }
 
         public Waiter WaitForCoroutine(IEnumerable<Waiter> coroutine)

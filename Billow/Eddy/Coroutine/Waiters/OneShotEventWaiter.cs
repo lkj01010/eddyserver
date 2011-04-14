@@ -14,7 +14,7 @@ namespace Eddy.Coroutine.Waiters
             this.oneShotEvent = oneShotEvent;
         }
 
-        protected override void CleanUp()
+        protected override void Cancel()
         {
             this.oneShotEvent.Remove(OnCompleted);
         }
@@ -24,19 +24,19 @@ namespace Eddy.Coroutine.Waiters
     {
         private readonly OneShotEvent<T> oneShotEvent;
         private readonly Action<T> action;
-        public OneShotEventWaiter(OneShotEvent<T> oneShotEvent, ValueExtractor<T> extractor)
+        public OneShotEventWaiter(OneShotEvent<T> oneShotEvent, Action<T> paramGetter)
         {
             action = (param) =>
                 {
-                    if (extractor != null)
-                        extractor.Value = param;
+                    if (paramGetter != null)
+                        paramGetter(param);
                     OnCompleted();
                 };
             oneShotEvent.Add(action);
             this.oneShotEvent = oneShotEvent;
         }
 
-        protected override void CleanUp()
+        protected override void Cancel()
         {
             this.oneShotEvent.Remove(action);
         }

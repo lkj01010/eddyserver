@@ -19,7 +19,7 @@ namespace Eddy.Coroutine.Waiters
                 waiter.Completed += this.OnCompleted;
         }
 
-        protected override void CleanUp()
+        protected override void Cancel()
         {
             foreach (var waiter in waiters)
                 waiter.Dispose();

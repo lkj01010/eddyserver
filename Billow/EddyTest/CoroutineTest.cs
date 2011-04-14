@@ -43,6 +43,7 @@ namespace EddyTest
 
         OneShotEvent event1 = new OneShotEvent();
         OneShotEvent<int> event2 = new OneShotEvent<int>();
+        OneShotEvent<CoroutineTest> event3 = new OneShotEvent<CoroutineTest>();
         int count = 0;
 
         private IEnumerable<Waiter> DoSomething()
@@ -50,22 +51,26 @@ namespace EddyTest
             count += 1;
             yield return WaitForOneShotEvent(event1);
             count += 2;
-            var extractor = new ValueExtractor<int>();
-            yield return WaitForOneShotEvent<int>(event2, extractor);
-            Assert.AreEqual(extractor.Value, 99);
+            int value = 0;
+            yield return WaitForOneShotEvent(event2, (x) => value = x);
+            Assert.AreEqual(value, 99);
             count += 3;
+            CoroutineTest test = null;
+            yield return WaitForOneShotEvent(event3, (x) => test = x);
+            count += 4;
+            Assert.AreSame(this, test);
         }
 
         private IEnumerable<Waiter> CombineCoroutine()
         {
-            var extractor = new ValueExtractor<int>();
+            int value = 0;
             yield return WaitForAny(
                 WaitForOneShotEvent(event1),
-                WaitForOneShotEvent<int>(event2, extractor));
-            if (extractor.Value == 0)
+                WaitForOneShotEvent<int>(event2, (x) => value = x));
+            if (value == 0)
                 count += 1;
             else
-                count += extractor.Value;
+                count += value;
         }
 
         [TestMethod]
@@ -77,12 +82,14 @@ namespace EddyTest
             Assert.AreEqual(3, count);
             event2.Raise(99);
             Assert.AreEqual(6, count);
-            event1.Raise();
+            event3.Raise(this);
+            Assert.AreEqual(10, count);
 
             // test if auto removed
-            Assert.AreEqual(6, count);
+            event1.Raise();
+            Assert.AreEqual(10, count);
             event2.Raise(98);
-            Assert.AreEqual(6, count);
+            Assert.AreEqual(10, count);
         }
 
         [TestMethod]
@@ -117,24 +124,24 @@ namespace EddyTest
             Assert.AreEqual(9, count);
         }
 
-        private IEnumerable<Waiter> IndexedChainCoroutine(ValueExtractor<int> index)
+        private IEnumerable<Waiter> IndexedChainCoroutine(Action<int> indexGetter)
         {
-            yield return WaitForAny(index,
+            yield return WaitForAny(indexGetter,
                 WaitForOneShotEvent(event1),
-                WaitForOneShotEvent(event2, new ValueExtractor<int>()));
+                WaitForOneShotEvent(event2, null));
         }
 
         [TestMethod]
         public void TestIndexedCombine()
         {
-            var index = ExtractValue<int>();
-            StartCoroutine(IndexedChainCoroutine(index));
+            int index = 0;
+            StartCoroutine(IndexedChainCoroutine((x) => index = x));
             event1.Raise();
-            Assert.AreEqual(0, index.Value);
+            Assert.AreEqual(0, index);
 
-            StartCoroutine(IndexedChainCoroutine(index));
+            StartCoroutine(IndexedChainCoroutine((x) => index = x));
             event2.Raise(0);
-            Assert.AreEqual(1, index.Value);
+            Assert.AreEqual(1, index);
         }
     }
 }

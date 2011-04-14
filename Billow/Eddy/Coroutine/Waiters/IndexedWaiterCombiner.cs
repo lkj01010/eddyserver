@@ -12,7 +12,7 @@ namespace Eddy.Coroutine.Waiters
     {
        private readonly Waiter[] waiters;
 
-       public IndexedWaiterCombiner(ValueExtractor<int> index, params Waiter[] waiters)
+       public IndexedWaiterCombiner(Action<int> indexGetter, params Waiter[] waiters)
         {
             this.waiters = waiters;
             for (int i = 0; i < waiters.Length; ++i)
@@ -20,13 +20,13 @@ namespace Eddy.Coroutine.Waiters
                 int value = i;
                 waiters[i].Completed += () =>
                     {
-                        index.Value = value;
+                        indexGetter(value);
                         this.OnCompleted();
                     };
             }
         }
 
-        protected override void CleanUp()
+        protected override void Cancel()
         {
             foreach (var waiter in waiters)
                 waiter.Dispose();
