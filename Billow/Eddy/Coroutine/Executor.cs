@@ -42,6 +42,8 @@ namespace Eddy.Coroutine
         /// <returns></returns>
         public T OnMessage<T>(T message) where T : class
         {
+            if (message == null)
+                throw new NullReferenceException();
             if (messageDispatcher == null)
                 return message;
             return messageDispatcher.OnMessage(message);

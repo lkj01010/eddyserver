@@ -46,7 +46,12 @@ namespace Eddy
 
         public void Update()
         {
-            Debug.Assert(baseThread == Thread.CurrentThread);
+            if (baseThread != Thread.CurrentThread)
+                throw new InvalidOperationException("Invalid thread.");
+
+            if (shutdown)
+                throw new InvalidOperationException("Dispatcher has shutdown.");
+
             lock (this)
             {
                 Utility.Swap(ref actionsProcessing, ref actionsToBeProcessed);
@@ -75,6 +80,7 @@ namespace Eddy
 
         public void Run()
         {
+            shutdown = false;
             while (true)
             {
                 Update();
