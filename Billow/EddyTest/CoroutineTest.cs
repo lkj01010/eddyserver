@@ -108,6 +108,7 @@ namespace EddyTest
             count += 2;
             yield return WaitForOneShotEvent(event1);
             count += 3;
+            yield return WaitForOneShotEvent(event1);
         }
 
         private IEnumerable<Waiter> ChainCoroutine()
@@ -121,10 +122,18 @@ namespace EddyTest
         {
             StartCoroutine(ChainCoroutine());
             event1.Raise();
+            event1.Raise();
             Assert.AreEqual(9, count);
+
+            count = 0;
+            var controller = StartCoroutine(ChainCoroutine());
+            event1.Raise();
+            controller.Stop();
+            event1.Raise();
+            Assert.AreEqual(5, count);
         }
 
-        private IEnumerable<Waiter> IndexedChainCoroutine(Action<int> indexGetter)
+        private IEnumerable<Waiter> IndexedCombineCoroutine(Action<int> indexGetter)
         {
             yield return WaitForAny(indexGetter,
                 WaitForOneShotEvent(event1),
@@ -135,13 +144,39 @@ namespace EddyTest
         public void TestIndexedCombine()
         {
             int index = 0;
-            StartCoroutine(IndexedChainCoroutine((x) => index = x));
+            StartCoroutine(IndexedCombineCoroutine((x) => index = x));
             event1.Raise();
             Assert.AreEqual(0, index);
 
-            StartCoroutine(IndexedChainCoroutine((x) => index = x));
+            StartCoroutine(IndexedCombineCoroutine((x) => index = x));
             event2.Raise(0);
             Assert.AreEqual(1, index);
+        }
+
+        private class SomeMessage
+        {
+        }
+
+        private IEnumerable<Waiter> MessageCoroutine()
+        {
+            SomeMessage message = null;
+            yield return WaitForMessage<SomeMessage>((x) => message = x);
+            count = 1;
+            Assert.AreNotEqual(null, message);
+        }
+
+        [TestMethod]
+        public void TestMessage()
+        {
+            StartCoroutine(MessageCoroutine());
+            OnMessage(new SomeMessage());
+            Assert.AreEqual(1, count);
+
+            count = 0;
+            var controller = StartCoroutine(MessageCoroutine());
+            controller.Stop();
+            OnMessage(new SomeMessage());
+            Assert.AreEqual(0, count);
         }
     }
 }
