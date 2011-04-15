@@ -65,6 +65,21 @@ namespace Eddy.Coroutine
             return new EventWaiter<T>(hooker, unhooker, paramGetter);
         }
 
+        public Waiter WaitForEvent<T1, T2>(Action<Action<T1, T2>> hooker, Action<Action<T1, T2>> unhooker, Action<T1, T2> paramGetter)
+        {
+            return new EventWaiter<T1, T2>(hooker, unhooker, paramGetter);
+        }
+
+        public Waiter WaitForEvent<T1, T2, T3>(Action<Action<T1, T2, T3>> hooker, Action<Action<T1, T2, T3>> unhooker, Action<T1, T2, T3> paramGetter)
+        {
+            return new EventWaiter<T1, T2, T3>(hooker, unhooker, paramGetter);
+        }
+
+        public Waiter WaitForEvent<T1, T2, T3, T4>(Action<Action<T1, T2, T3, T4>> hooker, Action<Action<T1, T2, T3, T4>> unhooker, Action<T1, T2, T3, T4> paramGetter)
+        {
+            return new EventWaiter<T1, T2, T3, T4>(hooker, unhooker, paramGetter);
+        }
+
         public Waiter WaitForOneShotEvent(OneShotEvent oneShotEvent)
         {
             return new OneShotEventWaiter(oneShotEvent);
@@ -73,6 +88,21 @@ namespace Eddy.Coroutine
         public Waiter WaitForOneShotEvent<T>(OneShotEvent<T> oneShotEvent, Action<T> paramGetter)
         {
             return new OneShotEventWaiter<T>(oneShotEvent, paramGetter);
+        }
+
+        public Waiter WaitForOneShotEvent<T1, T2>(OneShotEvent<T1, T2> oneShotEvent, Action<T1, T2> paramGetter)
+        {
+            return new OneShotEventWaiter<T1, T2>(oneShotEvent, paramGetter);
+        }
+
+        public Waiter WaitForOneShotEvent<T1, T2, T3>(OneShotEvent<T1, T2, T3> oneShotEvent, Action<T1, T2, T3> paramGetter)
+        {
+            return new OneShotEventWaiter<T1, T2, T3>(oneShotEvent, paramGetter);
+        }
+
+        public Waiter WaitForOneShotEvent<T1, T2, T3, T4>(OneShotEvent<T1, T2, T3, T4> oneShotEvent, Action<T1, T2, T3, T4> paramGetter)
+        {
+            return new OneShotEventWaiter<T1, T2, T3, T4>(oneShotEvent, paramGetter);
         }
 
         public Waiter WaitForAny(params Waiter[] waiters)

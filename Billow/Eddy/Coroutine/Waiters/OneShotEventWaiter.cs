@@ -43,4 +43,73 @@ namespace Eddy.Coroutine.Waiters
                 this.oneShotEvent.Remove(action);
         }
     }
+
+    internal class OneShotEventWaiter<T1, T2> : Waiter
+    {
+        private readonly OneShotEvent<T1, T2> oneShotEvent;
+        private readonly Action<T1, T2> action;
+        public OneShotEventWaiter(OneShotEvent<T1, T2> oneShotEvent, Action<T1, T2> paramGetter)
+        {
+            action = (param1, param2) =>
+            {
+                if (paramGetter != null)
+                    paramGetter(param1, param2);
+                OnCompleted();
+            };
+            oneShotEvent.Add(action);
+            this.oneShotEvent = oneShotEvent;
+        }
+
+        internal override void CleanUp(bool completed)
+        {
+            if (!completed)
+                this.oneShotEvent.Remove(action);
+        }
+    }
+
+    internal class OneShotEventWaiter<T1, T2, T3> : Waiter
+    {
+        private readonly OneShotEvent<T1, T2, T3> oneShotEvent;
+        private readonly Action<T1, T2, T3> action;
+        public OneShotEventWaiter(OneShotEvent<T1, T2, T3> oneShotEvent, Action<T1, T2, T3> paramGetter)
+        {
+            action = (param1, param2, param3) =>
+            {
+                if (paramGetter != null)
+                    paramGetter(param1, param2, param3);
+                OnCompleted();
+            };
+            oneShotEvent.Add(action);
+            this.oneShotEvent = oneShotEvent;
+        }
+
+        internal override void CleanUp(bool completed)
+        {
+            if (!completed)
+                this.oneShotEvent.Remove(action);
+        }
+    }
+
+    internal class OneShotEventWaiter<T1, T2, T3, T4> : Waiter
+    {
+        private readonly OneShotEvent<T1, T2, T3, T4> oneShotEvent;
+        private readonly Action<T1, T2, T3, T4> action;
+        public OneShotEventWaiter(OneShotEvent<T1, T2, T3, T4> oneShotEvent, Action<T1, T2, T3, T4> paramGetter)
+        {
+            action = (param1, param2, param3, param4) =>
+            {
+                if (paramGetter != null)
+                    paramGetter(param1, param2, param3, param4);
+                OnCompleted();
+            };
+            oneShotEvent.Add(action);
+            this.oneShotEvent = oneShotEvent;
+        }
+
+        internal override void CleanUp(bool completed)
+        {
+            if (!completed)
+                this.oneShotEvent.Remove(action);
+        }
+    }
 }
