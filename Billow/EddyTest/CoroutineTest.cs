@@ -38,26 +38,26 @@ namespace EddyTest
         public void MyTestCleanup() 
         {
             Assert.AreEqual(0, GetControllerCount());
-            count = 0; 
+            Count = 0; 
         }
 
-        OneShotEvent event1 = new OneShotEvent();
-        OneShotEvent<int> event2 = new OneShotEvent<int>();
-        OneShotEvent<CoroutineTest> event3 = new OneShotEvent<CoroutineTest>();
-        int count = 0;
+        OneShotEvent OneShotNoArgEvent = new OneShotEvent();
+        OneShotEvent<int> OneShotIntArgEvent = new OneShotEvent<int>();
+        OneShotEvent<CoroutineTest> OneShotClassArgEvent = new OneShotEvent<CoroutineTest>();
+        int Count { get; set; }
 
-        private IEnumerable<Waiter> DoSomething()
+        private IEnumerable<Waiter> OneShotEventCoroutine()
         {
-            count += 1;
-            yield return WaitForOneShotEvent(event1);
-            count += 2;
+            Count += 1;
+            yield return WaitForOneShotEvent(OneShotNoArgEvent);
+            Count += 2;
             int value = 0;
-            yield return WaitForOneShotEvent(event2, (x) => value = x);
+            yield return WaitForOneShotEvent(OneShotIntArgEvent, (x) => value = x);
             Assert.AreEqual(value, 99);
-            count += 3;
+            Count += 3;
             CoroutineTest test = null;
-            yield return WaitForOneShotEvent(event3, (x) => test = x);
-            count += 4;
+            yield return WaitForOneShotEvent(OneShotClassArgEvent, (x) => test = x);
+            Count += 4;
             Assert.AreSame(this, test);
         }
 
@@ -65,79 +65,86 @@ namespace EddyTest
         {
             int value = 0;
             yield return WaitForAny(
-                WaitForOneShotEvent(event1),
-                WaitForOneShotEvent<int>(event2, (x) => value = x));
+                WaitForOneShotEvent(OneShotNoArgEvent),
+                WaitForOneShotEvent<int>(OneShotIntArgEvent, (x) => value = x));
             if (value == 0)
-                count += 1;
+                Count += 1;
             else
-                count += value;
+                Count += value;
         }
 
         [TestMethod]
         public void TestOneShotEvent()
         {
-            StartCoroutine(DoSomething());
-            Assert.AreEqual(1, count);
-            event1.Raise();
-            Assert.AreEqual(3, count);
-            event2.Raise(99);
-            Assert.AreEqual(6, count);
-            event3.Raise(this);
-            Assert.AreEqual(10, count);
+            StartCoroutine(OneShotEventCoroutine());
+            Assert.AreEqual(1, Count);
+            OneShotNoArgEvent.Raise();
+            Assert.AreEqual(3, Count);
+            OneShotIntArgEvent.Raise(99);
+            Assert.AreEqual(6, Count);
+            OneShotClassArgEvent.Raise(this);
+            Assert.AreEqual(10, Count);
 
             // test if auto removed
-            event1.Raise();
-            Assert.AreEqual(10, count);
-            event2.Raise(98);
-            Assert.AreEqual(10, count);
+            OneShotNoArgEvent.Raise();
+            Assert.AreEqual(10, Count);
+            OneShotIntArgEvent.Raise(98);
+            Assert.AreEqual(10, Count);
         }
 
         [TestMethod]
         public void TestCombiner()
         {
             StartCoroutine(CombineCoroutine());
-            event1.Raise();
-            Assert.AreEqual(1, count);
+            OneShotNoArgEvent.Raise();
+            Assert.AreEqual(1, Count);
+
             StartCoroutine(CombineCoroutine());
-            event2.Raise(99);
-            Assert.AreEqual(100, count);
+            OneShotIntArgEvent.Raise(99);
+            Assert.AreEqual(100, Count);
+
+            var controller = StartCoroutine(CombineCoroutine());
+            controller.Stop();
+            OneShotNoArgEvent.Raise();
+            Assert.AreEqual(100, Count);
         }
 
         private IEnumerable<Waiter> SubChainCoroutine()
         {
-            count += 2;
-            yield return WaitForOneShotEvent(event1);
-            count += 3;
-            yield return WaitForOneShotEvent(event1);
+            Count += 2;
+            yield return WaitForOneShotEvent(OneShotNoArgEvent);
+            Count += 3;
+            yield return WaitForOneShotEvent(OneShotNoArgEvent);
         }
 
         private IEnumerable<Waiter> ChainCoroutine()
         {
             yield return WaitForCoroutine(SubChainCoroutine());
-            count += 4;
+            Count += 4;
         }
 
         [TestMethod]
         public void TestChain()
         {
             StartCoroutine(ChainCoroutine());
-            event1.Raise();
-            event1.Raise();
-            Assert.AreEqual(9, count);
+            OneShotNoArgEvent.Raise();
+            OneShotNoArgEvent.Raise();
+            Assert.AreEqual(9, Count);
 
-            count = 0;
+            // test stop
+            Count = 0;
             var controller = StartCoroutine(ChainCoroutine());
-            event1.Raise();
+            OneShotNoArgEvent.Raise();
             controller.Stop();
-            event1.Raise();
-            Assert.AreEqual(5, count);
+            OneShotNoArgEvent.Raise();
+            Assert.AreEqual(5, Count);
         }
 
         private IEnumerable<Waiter> IndexedCombineCoroutine(Action<int> indexGetter)
         {
             yield return WaitForAny(indexGetter,
-                WaitForOneShotEvent(event1),
-                WaitForOneShotEvent(event2, null));
+                WaitForOneShotEvent(OneShotNoArgEvent),
+                WaitForOneShotEvent(OneShotIntArgEvent, null));
         }
 
         [TestMethod]
@@ -145,11 +152,12 @@ namespace EddyTest
         {
             int index = 0;
             StartCoroutine(IndexedCombineCoroutine((x) => index = x));
-            event1.Raise();
+            OneShotNoArgEvent.Raise();
             Assert.AreEqual(0, index);
 
+            // test stop
             StartCoroutine(IndexedCombineCoroutine((x) => index = x));
-            event2.Raise(0);
+            OneShotIntArgEvent.Raise(0);
             Assert.AreEqual(1, index);
         }
 
@@ -161,7 +169,7 @@ namespace EddyTest
         {
             SomeMessage message = null;
             yield return WaitForMessage<SomeMessage>((x) => message = x);
-            count = 1;
+            Count = 1;
             Assert.AreNotEqual(null, message);
         }
 
@@ -170,40 +178,42 @@ namespace EddyTest
         {
             StartCoroutine(MessageCoroutine());
             OnMessage(new SomeMessage());
-            Assert.AreEqual(1, count);
+            Assert.AreEqual(1, Count);
 
-            count = 0;
+            // test stop
+            Count = 0;
             var controller = StartCoroutine(MessageCoroutine());
             controller.Stop();
             OnMessage(new SomeMessage());
-            Assert.AreEqual(0, count);
+            Assert.AreEqual(0, Count);
         }
 
-        private event Action<int> event4;
+        private event Action<int> IntArgEvent;
 
         private IEnumerable<Waiter> EventCoroutine()
         {
-            count += 1;
+            Count += 1;
             int value = 0;
-            yield return WaitForEvent<int>((x) => event4 += x, (x) => event4 -= x, (x) => value = x);
-            count += value;
+            yield return WaitForEvent<int>((x) => IntArgEvent += x, (x) => IntArgEvent -= x, (x) => value = x);
+            Count += value;
         }
 
         [TestMethod]
         public void TestEvent()
         {
             StartCoroutine(EventCoroutine());
-            Assert.AreEqual(1, count);
-            event4(2);
-            Assert.AreEqual(3, count);
+            Assert.AreEqual(1, Count);
+            IntArgEvent(2);
+            Assert.AreEqual(3, Count);
 
-            count = 0;
+            // test stop
+            Count = 0;
             var controller = StartCoroutine(EventCoroutine());
-            Assert.AreEqual(1, count);
+            Assert.AreEqual(1, Count);
             controller.Stop();
-            if (event4 != null)
-                event4(2);
-            Assert.AreEqual(1, count);
+            if (IntArgEvent != null)
+                IntArgEvent(2);
+            Assert.AreEqual(1, Count);
         }
     }
 }
