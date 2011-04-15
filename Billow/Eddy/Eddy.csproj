@@ -113,9 +113,9 @@
     <Compile Include="OneShotEvent.cs" />
     <Compile Include="SimpleDispatcher.cs" />
     <Compile Include="Singleton.cs" />
-    <Compile Include="Timers\SlotTimer.cs" />
-    <Compile Include="Timers\SlotTimerNode.cs" />
-    <Compile Include="Timers\SlotTimerScheduler.cs" />
+    <Compile Include="Timers\Timer.cs" />
+    <Compile Include="Timers\TimerNode.cs" />
+    <Compile Include="Timers\TimerScheduler.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Net\TcpService.cs" />

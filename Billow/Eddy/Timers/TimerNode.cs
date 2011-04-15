@@ -5,10 +5,10 @@ using System.Text;
 
 namespace Eddy.Timers
 {
-    public class SlotTimerNode
+    public class TimerNode
     {
-        internal SlotTimerNode Prev { get; private set; }
-        internal SlotTimerNode Next { get; private set; }
+        internal TimerNode Prev { get; private set; }
+        internal TimerNode Next { get; private set; }
 
         internal void LinkSelf()
         {
@@ -17,7 +17,7 @@ namespace Eddy.Timers
             Next = this;
         }
 
-        internal void LinkBefore(SlotTimerNode node)
+        internal void LinkBefore(TimerNode node)
         {
             Unlink();
 
@@ -31,7 +31,7 @@ namespace Eddy.Timers
             this.Next = node;
         }
 
-        internal void LinkAfter(SlotTimerNode node)
+        internal void LinkAfter(TimerNode node)
         {
             Unlink();
 

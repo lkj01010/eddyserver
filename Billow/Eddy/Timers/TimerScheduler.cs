@@ -6,30 +6,30 @@ using System.Threading;
 
 namespace Eddy.Timers
 {
-    class SlotTimerScheduler
+    class TimerScheduler
     {
         [ThreadStatic]
-        private static SlotTimerScheduler currentScheduler;
-        private List<SlotTimerNode> slots;
-        private SlotTimerNode tempSlot;
+        private static TimerScheduler currentScheduler;
+        private List<TimerNode> slots;
+        private TimerNode tempSlot;
         private int lastFiredSlot;
         private DateTime lastFiredTime;
         private readonly DateTime startTime;
-        private Timer updateTimer;
+        private System.Threading.Timer updateTimer;
         private TimeSpan slotInterval;
         internal Func<DateTime> DateTimeProvider { get; private set; }
 
-        internal static SlotTimerScheduler CurrentScheduler
+        internal static TimerScheduler CurrentScheduler
         {
             get
             {
                 if (currentScheduler == null)
-                    currentScheduler = new SlotTimerScheduler();
+                    currentScheduler = new TimerScheduler();
                 return currentScheduler;
             }
         }
 
-        private SlotTimerScheduler()
+        private TimerScheduler()
             : this(8192, 20, () => Eddy.DateTimeProvider.Now)
         {
         }
@@ -40,16 +40,16 @@ namespace Eddy.Timers
         /// <param name="numSlots">总槽数，越大则槽冲突越小</param>
         /// <param name="slotInterval">槽间隔，越小精度越高，单位毫秒</param>
         /// <param name="dateTimeProvider">获取当前DateTime的函数</param>
-        private SlotTimerScheduler(int numSlots, int slotInterval, Func<DateTime> dateTimeProvider)
+        private TimerScheduler(int numSlots, int slotInterval, Func<DateTime> dateTimeProvider)
         {
-            this.slots = new List<SlotTimerNode>(numSlots);
+            this.slots = new List<TimerNode>(numSlots);
             for (int i = 0; i < numSlots; ++i)
             {
-                var node = new SlotTimerNode();
+                var node = new TimerNode();
                 node.LinkSelf();
                 slots.Add(node);
             }
-            this.tempSlot = new SlotTimerNode();
+            this.tempSlot = new TimerNode();
             this.tempSlot.LinkSelf();
             this.slotInterval = new TimeSpan(0, 0, 0, 0, slotInterval);
             this.DateTimeProvider = dateTimeProvider;
@@ -62,7 +62,7 @@ namespace Eddy.Timers
                 {
                     dispatcher.Invoke(this.Update);
                 };
-            this.updateTimer = new Timer(callback, null,
+            this.updateTimer = new System.Threading.Timer(callback, null,
             new TimeSpan(0, 0, 0, 0, slotInterval / 2), new TimeSpan(0, 0, 0, 0, slotInterval));
         }
 
@@ -77,15 +77,15 @@ namespace Eddy.Timers
             if (currentScheduler != null)
                 throw new InvalidOperationException("SlotTimerScheduler has been initialized in this thread.");
 
-            currentScheduler = new SlotTimerScheduler(numSlots, slotInterval, dateTimeProvider);
+            currentScheduler = new TimerScheduler(numSlots, slotInterval, dateTimeProvider);
         }
 
-        internal void Remove(SlotTimer timer)
+        internal void Remove(Timer timer)
         {
             timer.Unlink();
         }
 
-        internal void Register(SlotTimer timer)
+        internal void Register(Timer timer)
         {
             int slot = GetSlot(timer.ExpiredTime);
             var head = slots[slot];
@@ -108,7 +108,7 @@ namespace Eddy.Timers
                 var slot = slots[lastFiredSlot];
                 while (slot.Next != slot)
                 {
-                    var timer = slot.Next as SlotTimer;
+                    var timer = slot.Next as Timer;
                     timer.Unlink();
                     if (timer.Circles > 0)
                     {

@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Eddy.Timers
 {
-    public sealed class SlotTimer : SlotTimerNode
+    public sealed class Timer : TimerNode
     {
-        private SlotTimerScheduler scheduler;
+        private TimerScheduler scheduler;
         private bool isEnabled = false;
         private TimeSpan interval;
 
@@ -16,12 +16,12 @@ namespace Eddy.Timers
 
         public event Action Tick;
 
-        public SlotTimer()
+        public Timer()
         {
-            scheduler = SlotTimerScheduler.CurrentScheduler;
+            scheduler = TimerScheduler.CurrentScheduler;
         }
 
-        public SlotTimer(TimeSpan interval, Action callback) : this()
+        public Timer(TimeSpan interval, Action callback) : this()
         {
             Interval = interval;
             Tick += callback;
@@ -71,12 +71,12 @@ namespace Eddy.Timers
 
         public static void InitializeScheduler(int numSlots, int slotInterval, Func<DateTime> dateTimeProvider)
         {
-            SlotTimerScheduler.Initialize(numSlots, slotInterval, dateTimeProvider);
+            TimerScheduler.Initialize(numSlots, slotInterval, dateTimeProvider);
         }
 
         private void CheckThread()
         {
-            if (SlotTimerScheduler.CurrentScheduler != scheduler)
+            if (TimerScheduler.CurrentScheduler != scheduler)
                 throw new InvalidOperationException("Please use SlotTimer in the thread which it was created.");
         }
 

@@ -11,11 +11,11 @@ namespace Eddy.Coroutine.Waiters
     /// </summary>
     internal class TimeSpanWaiter : Waiter
     {
-        private readonly SlotTimer timer;
+        private readonly Timer timer;
 
         public TimeSpanWaiter(TimeSpan span)
         {
-            timer = new SlotTimer(span, this.OnCompleted);
+            timer = new Timer(span, this.OnCompleted);
             timer.Start();
         }
 
