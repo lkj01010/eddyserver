@@ -55,6 +55,16 @@ namespace Eddy.Coroutine
             return new TimeSpanWaiter(span);
         }
 
+        public Waiter WaitForEvent(Action<Action> hooker, Action<Action> unhooker)
+        {
+            return new EventWaiter(hooker, unhooker);
+        }
+
+        public Waiter WaitForEvent<T>(Action<Action<T>> hooker, Action<Action<T>> unhooker, Action<T> paramGetter)
+        {
+            return new EventWaiter<T>(hooker, unhooker, paramGetter);
+        }
+
         public Waiter WaitForOneShotEvent(OneShotEvent oneShotEvent)
         {
             return new OneShotEventWaiter(oneShotEvent);

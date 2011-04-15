@@ -85,6 +85,7 @@
     </Compile>
     <Compile Include="Coroutine\Controller.cs" />
     <Compile Include="Coroutine\Executor.cs" />
+    <Compile Include="Coroutine\Waiters\EventWaiter.cs" />
     <Compile Include="Coroutine\Waiters\IndexedWaiterCombiner.cs" />
     <Compile Include="Coroutine\Waiters\MessageWaiter.cs" />
     <Compile Include="Coroutine\Waiters\OneShotEventWaiter.cs" />

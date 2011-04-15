@@ -178,5 +178,32 @@ namespace EddyTest
             OnMessage(new SomeMessage());
             Assert.AreEqual(0, count);
         }
+
+        private event Action<int> event4;
+
+        private IEnumerable<Waiter> EventCoroutine()
+        {
+            count += 1;
+            int value = 0;
+            yield return WaitForEvent<int>((x) => event4 += x, (x) => event4 -= x, (x) => value = x);
+            count += value;
+        }
+
+        [TestMethod]
+        public void TestEvent()
+        {
+            StartCoroutine(EventCoroutine());
+            Assert.AreEqual(1, count);
+            event4(2);
+            Assert.AreEqual(3, count);
+
+            count = 0;
+            var controller = StartCoroutine(EventCoroutine());
+            Assert.AreEqual(1, count);
+            controller.Stop();
+            if (event4 != null)
+                event4(2);
+            Assert.AreEqual(1, count);
+        }
     }
 }
