@@ -9,9 +9,9 @@ using Eddy;
 namespace EddyTest
 {
     [TestClass]
-    public class SlotTimerTest
+    public class TimerTest
     {
-        public SlotTimerTest()
+        public TimerTest()
         {
         }
 
@@ -36,7 +36,7 @@ namespace EddyTest
         [TestMethod]
         public void TestSlotTimer()
         {
-            var timer = new SlotTimer();
+            var timer = new Timer();
             var startTime = DateTimeProvider.Now;
             var count = 0;
             timer.Interval = new TimeSpan(0, 0, 0, 0, 100);
