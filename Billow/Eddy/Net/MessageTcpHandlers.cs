@@ -24,7 +24,7 @@ namespace Eddy.Net
         /// 反序列化接收到的数据，输出message 
         /// messageHandler需要保证线程安全
         /// </summary>
-        public TcpSession.ReceivedHandler CreateReceivedHandler(Action<ProtoBuf.IExtensible> messageHandler)
+        public TcpSession.ReceivedHandler CreateReceivedHandler(TcpSession session, Action<TcpSession, object> messageHandler)
         {
             bool isInitialized = false;
             bool isReadingHeader = true;
@@ -57,7 +57,7 @@ namespace Eddy.Net
                     {
                         // 拼包然后反序列化
                         stream.WriteTo(partialStream);
-                        ProtoBuf.IExtensible message = null;
+                        object message = null;
                         try
                         {
                            message = this.serializer.Deserialize(partialStream.GetBuffer(), 0, (int)partialStream.Length);
@@ -68,7 +68,7 @@ namespace Eddy.Net
                         }
 
                         if (message != null)
-                            messageHandler(message);
+                            messageHandler(session, message);
 
                         partialStream.Position = 0;
                         partialStream.SetLength(0);
@@ -76,7 +76,7 @@ namespace Eddy.Net
                     else // 普通大小的包
                     {
                         // 直接反序列化
-                        ProtoBuf.IExtensible message = null;
+                        object message = null;
                         try
                         {
                             message = this.serializer.Deserialize(stream.GetBuffer(), (int)stream.Position, (int)stream.Length);
@@ -87,7 +87,7 @@ namespace Eddy.Net
                         }
 
                         if (message != null)
-                            messageHandler(message);
+                            messageHandler(session, message);
                     }
 
                     isReadingHeader = true;
@@ -118,7 +118,7 @@ namespace Eddy.Net
                     stream.SetLength(stream.Length + PackageHead.SizeOf);
                     stream.Position += PackageHead.SizeOf;
                     // 序列化消息
-                    serializer.Serialize(message as ProtoBuf.IExtensible, stream);
+                    serializer.Serialize(message, stream);
 
                     PackageHead header = new PackageHead();
                     var length = stream.Length - (headerPosition + PackageHead.SizeOf);

@@ -43,6 +43,7 @@ namespace EddyTest
             [ProtoMember(3)]
             public List<float> Values { get; set; }
         }
+
         [TestMethod]
         public void TestSerializer()
         {

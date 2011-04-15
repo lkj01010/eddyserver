@@ -65,7 +65,7 @@ namespace Eddy.Test
 		#endregion
 
 
-		private static IExtensible EncoderTest(MessageSerializer target, IExtensible msg)
+        private static object EncoderTest(MessageSerializer target, IExtensible msg)
 		{
 			byte[] buf1 = target.Serialize(msg);
 			byte[] buf2 = target.Serialize(target.Deserialize(buf1));

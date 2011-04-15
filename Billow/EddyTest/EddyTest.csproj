@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="CoroutineTest.cs" />
     <Compile Include="MessageEncoderTest.cs" />
+    <Compile Include="NetworkTest.cs" />
     <Compile Include="PackageHeadTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OneShotEventTest.cs" />

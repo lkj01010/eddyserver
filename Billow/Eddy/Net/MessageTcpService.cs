@@ -17,19 +17,19 @@ namespace Eddy.Net
         }
 
         public MessageTcpService(MessageSerializer serializer,
-            Action<ProtoBuf.IExtensible> messageHandler) : 
+            Action<TcpSession, object> messageHandler) : 
             this(serializer, messageHandler, () => new TcpSession())
         {
         }
 
         public MessageTcpService(MessageSerializer serializer,
-            Action<ProtoBuf.IExtensible> messageHandler, Func<TcpSession> creator)
+            Action<TcpSession, object> messageHandler, Func<TcpSession> creator)
         {
             handlers = new MessageTcpHandlers(serializer);
             base.Initialize(() => 
             {
                 var session = creator();
-                session.Initialize(handlers.CreateReceivedHandler(messageHandler),
+                session.Initialize(handlers.CreateReceivedHandler(session, messageHandler),
                     handlers.CreateSendingHandler());
                 return session;
             });
