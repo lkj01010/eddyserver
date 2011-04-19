@@ -7,7 +7,7 @@ namespace Eddy.Coroutine
 {
     public abstract class Waiter
     {
-        public event Action Completed;
+        internal event Action Completed;
 
         protected void OnCompleted()
         {

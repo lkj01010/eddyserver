@@ -7,16 +7,16 @@ namespace Eddy.Coroutine.Waiters
 {
     internal class EventWaiter : Waiter
     {
-        private readonly Action<Action> unhooker;
-        public EventWaiter(Action<Action> hooker, Action<Action> unhooker)
+        private readonly Action<Action> subscriber;
+        public EventWaiter(Action<Action> subscriber, Action<Action> unsubscriber)
         {
-            hooker(OnCompleted);
-            this.unhooker = unhooker;
+            subscriber(OnCompleted);
+            this.subscriber = unsubscriber;
         }
 
         internal override void CleanUp(bool completed)
         {
-            unhooker(OnCompleted);
+            subscriber(OnCompleted);
         }
     }
 
