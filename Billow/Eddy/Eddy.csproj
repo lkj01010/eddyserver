@@ -80,9 +80,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Message\MessagePackage\MessagePackage.proto.cs">
-      <Link>Message\MessagePackage.proto.cs</Link>
-    </Compile>
     <Compile Include="Coroutine\Controller.cs" />
     <Compile Include="Coroutine\Executor.cs" />
     <Compile Include="Coroutine\Waiters\EventWaiter.cs" />
@@ -103,6 +100,7 @@
     <Compile Include="MD5Hash.cs" />
     <Compile Include="Coroutine\MessageDispatcher.cs" />
     <Compile Include="Message\ExecuteAttribute.cs" />
+    <Compile Include="Message\MessagePackage.proto.cs" />
     <Compile Include="Message\MessageSerializer.cs" />
     <Compile Include="Message\MessageTypeID.cs" />
     <Compile Include="Message\MessageTypeParser.cs" />
@@ -139,11 +137,6 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Message\MessagePackage\MessagePackage.proto">
-      <Link>Message\MessagePackage.proto</Link>
-    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
