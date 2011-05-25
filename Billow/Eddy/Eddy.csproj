@@ -95,7 +95,6 @@
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\IExtensibleExtensions.cs" />
     <Compile Include="Extensions\SortedListExtensions.cs" />
-    <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="MD5Hash.cs" />
     <Compile Include="Coroutine\MessageDispatcher.cs" />
     <Compile Include="Message\ExecuteAttribute.cs" />
