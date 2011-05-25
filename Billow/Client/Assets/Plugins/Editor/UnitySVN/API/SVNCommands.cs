@@ -288,7 +288,6 @@ namespace SVNIntegrationNameSpace
                 {
                     foreach (string assetPathIt in assets)
                     {
-                        Debug.Log(assetPathIt);
                         if (mStatusDatabase[assetPathIt].bypassRevisionControl)
                         {
                             Debug.LogError("Commit Aborted: Tried to commit a file marked as bypass revision control: " + assetPathIt);
