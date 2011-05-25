@@ -92,7 +92,6 @@
     <Compile Include="Coroutine\Waiters\WaiterCombiner.cs" />
     <Compile Include="DateTimeProvider.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
-    <Compile Include="Extensions\FormExtensions.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\IExtensibleExtensions.cs" />
     <Compile Include="Extensions\SortedListExtensions.cs" />
