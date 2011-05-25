@@ -216,7 +216,6 @@ namespace SVNIntegrationNameSpace
                 if (!assetPathIt.EndsWith(".meta"))
                 {
                     var metaAssetPath = assetPathIt + ".meta";
-                    Debug.Log(metaAssetPath);
                     var metaStatus = mStatusDatabase.GetMetaStatus(metaAssetPath);
                     if (metaStatus.fileStatus != ESVNFileStatus.Normal)
                     {

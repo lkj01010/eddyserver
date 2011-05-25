@@ -61,7 +61,10 @@ public class SVNMenuItems : ScriptableObject
     [MenuItem("Assets/SVN/" + SVNTerminoligy.commit)]
     static void SVNCommitProjectContext()
     {
-        SVNCommands.instance.SVNCommit(GetAssetPathsOfSelected().ToArray(), "Commit from unity");
+        SVNCommentWindow.Init().Confirm += (message) =>
+            {
+                SVNCommands.instance.SVNCommit(GetAssetPathsOfSelected().ToArray(), message);
+            };
     }
 
     // Revert
