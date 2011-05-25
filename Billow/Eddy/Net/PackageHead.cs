@@ -31,7 +31,7 @@ namespace Eddy.Net
 
 		static PackageHead()
 		{
-			unsafe { s_size = sizeof(PackageHead); }
+            s_size = System.Runtime.InteropServices.Marshal.SizeOf(typeof(PackageHead));
 		}
 
 		public void WriteTo(System.IO.Stream stream)
@@ -43,32 +43,16 @@ namespace Eddy.Net
 
 		public void WriteTo(byte[] buf, int index)
 		{
-			CheckBuf(buf, index);
-
-			unsafe
-			{
-				fixed (byte* p = &buf[index])
-				{
-					PackageHead* head = (PackageHead*)p;
-					head->Flags = this.Flags;
-					head->MessageLength = this.MessageLength;
-				}
-			}
+            var flags = BitConverter.GetBytes((ushort)this.Flags);
+            var length = BitConverter.GetBytes(this.MessageLength);
+            flags.CopyTo(buf, index);
+            length.CopyTo(buf, index + flags.Length);
 		}
 
 		public void ReadFrom(byte[] buf, int offset)
 		{
-			CheckBuf(buf, offset);
-
-			unsafe
-			{
-				fixed (byte* p = &buf[offset])
-				{
-					PackageHead* head = (PackageHead*)p;
-					this.Flags = head->Flags;
-					this.MessageLength = head->MessageLength;
-				}
-			}
+            this.Flags = (PackageHeadFlags)BitConverter.ToUInt16(buf, offset);
+            this.MessageLength = BitConverter.ToUInt16(buf, offset + sizeof(PackageHeadFlags));
 		}
 
 		private static void CheckBuf(byte[] buf, int index)
