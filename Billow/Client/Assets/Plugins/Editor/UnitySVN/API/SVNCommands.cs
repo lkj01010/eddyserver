@@ -269,7 +269,12 @@ namespace SVNIntegrationNameSpace
             return assets;
         }
 
-        public void SVNCommit(IEnumerable<string> assets, string commitMessage, bool async = true)
+        public void SVNCommit(IEnumerable<string> assets, string commitMessage)
+        {
+            SVNCommit(assets, commitMessage, true);
+        }
+
+        public void SVNCommit(IEnumerable<string> assets, string commitMessage, bool async)
         {
             if (assets.Count() > 0)
             {

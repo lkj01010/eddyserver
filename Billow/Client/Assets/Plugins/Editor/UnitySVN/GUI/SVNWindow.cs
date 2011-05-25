@@ -290,7 +290,11 @@ public class SVNWindow : EditorWindow, IDelegatePriority
                 if (GUILayout.Button(SVNTerminoligy.commit, EditorStyles.toolbarButton, buttonLayout))
                 {
                     var assetsToBeCommited = GetSelectedAssets();
-                    SVNCommands.instance.SVNCommit(assetsToBeCommited, mCommitMessage.Length == 0 ? "Commit from Unity" : mCommitMessage);
+                    //SVNCommands.instance.SVNCommit(assetsToBeCommited, mCommitMessage.Length == 0 ? "Commit from Unity" : mCommitMessage);
+                    SVNCommentWindow.Init().Confirm += (message) =>
+                    {
+                        SVNCommands.instance.SVNCommit(assetsToBeCommited, message);
+                    };
                 }
             }
 
