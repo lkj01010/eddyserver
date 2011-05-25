@@ -7,13 +7,11 @@ namespace Eddy.Coroutine.Waiters
 {
     internal class MessageWaiter<T> : Waiter where T : class
     {
-        private readonly Action<T> messageGetter;
         private MessageDispatcher dispatcher;
         private readonly Action<object> handler;
 
         public MessageWaiter(MessageDispatcher dispatcher, Action<T> messageGetter)
         {
-            this.messageGetter = messageGetter;
             this.dispatcher = dispatcher;
             this.handler = (message) =>
                 {

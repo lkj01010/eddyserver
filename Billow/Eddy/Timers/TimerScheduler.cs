@@ -6,6 +6,7 @@ using System.Threading;
 
 namespace Eddy.Timers
 {
+#pragma warning disable 0414
     class TimerScheduler
     {
         [ThreadStatic]
