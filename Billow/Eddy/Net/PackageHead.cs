@@ -43,15 +43,14 @@ namespace Eddy.Net
 
 		public void WriteTo(byte[] buf, int index)
 		{
-            var flags = BitConverter.GetBytes((ushort)this.Flags);
             var length = BitConverter.GetBytes(this.MessageLength);
-            flags.CopyTo(buf, index);
-            length.CopyTo(buf, index + flags.Length);
+            buf[index] = (byte)this.Flags;
+            length.CopyTo(buf, index + sizeof(PackageHeadFlags));
 		}
 
 		public void ReadFrom(byte[] buf, int offset)
 		{
-            this.Flags = (PackageHeadFlags)BitConverter.ToUInt16(buf, offset);
+            this.Flags = (PackageHeadFlags)buf[offset];
             this.MessageLength = BitConverter.ToUInt16(buf, offset + sizeof(PackageHeadFlags));
 		}
 

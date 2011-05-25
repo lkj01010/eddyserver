@@ -73,13 +73,13 @@ namespace Eddy.Test
 			PackageHead other = new PackageHead();
 			byte[] temp = new byte[PackageHead.SizeOf];
 
-			target.Flags = ushort.MinValue;
+			target.Flags = byte.MinValue;
 			target.MessageLength = ushort.MinValue;
 			target.WriteTo(temp, 0);
 			other.ReadFrom(temp, 0);
 			Assert.AreEqual(target, other);
 
-			target.Flags = (PackageHeadFlags)ushort.MaxValue;
+			target.Flags = (PackageHeadFlags)byte.MaxValue;
 			target.MessageLength = ushort.MaxValue;
 			target.WriteTo(temp, 0);
 			other.ReadFrom(temp, 0);
