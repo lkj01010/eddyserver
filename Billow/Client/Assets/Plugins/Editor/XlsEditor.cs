@@ -2,51 +2,50 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using UnityEngine;
 using UnityEditor;
-using org.in2bits.MyXls;
+using SmartXLS;
 
 class XlsEditor : EditorWindow
 {
-    private XlsDocument document;
+    private WorkBook book;
+    private string path;
 
     public static void Init(string path)
     {
         var window = GetWindow<XlsEditor>();
-        window.document = new XlsDocument(path);
+        window.book = new WorkBook();
+        window.book.read(path);
+        window.path = path;
     }
 
     void OnGUI()
     {
-        var sheet = document.Workbook.Worksheets[0];
-        var rows = sheet.Rows;
         EditorGUILayout.BeginVertical();
-        GUILayoutOption[] buttonLayout = { GUILayout.MaxWidth(10), GUILayout.ExpandWidth(true) };
 
-        var firstRow = rows[(ushort)rows.MinRow];
+        if (GUILayout.Button("Save", new[] { GUILayout.MaxWidth(50) }))
+        {
+            book.write(path);
+        }
+
+        GUILayoutOption[] buttonLayout = { GUILayout.MinWidth(40), GUILayout.MaxWidth(100), GUILayout.ExpandWidth(true) };
+
         {
             EditorGUILayout.BeginHorizontal();
-            for (uint i = firstRow.MinCellCol; i <= firstRow.MaxCellCol; ++i)
+            for (int i = 0; i <= book.LastCol; ++i)
             {
-                GUILayout.Button(firstRow.CellAtCol((ushort)i).Value.ToString(), buttonLayout);
+                GUILayout.Button(book.getText(0, i), buttonLayout);
             }
             EditorGUILayout.EndHorizontal();
         }
 
-        for (uint i = rows.MinRow + 1; i <= rows.MaxRow; ++i)
+        for (int i = 1; i <= book.LastRow; ++i)
         {
-            var row = rows[(ushort)i];
             EditorGUILayout.BeginHorizontal();
-            for (uint j = firstRow.MinCellCol; j <= firstRow.MaxCellCol; ++j)
+            for (int j = 0; j <= book.LastCol; ++j)
             {
-                if (row.CellExists((ushort)j))
-                {
-                    GUILayout.TextField(row.CellAtCol((ushort)j).Value.ToString(), buttonLayout);
-                }
-                else
-                {
-                    GUILayout.TextField("", buttonLayout);
-                }
+                GUILayout.TextField(book.getText(i, j), buttonLayout);
             }
             EditorGUILayout.EndHorizontal();
         }

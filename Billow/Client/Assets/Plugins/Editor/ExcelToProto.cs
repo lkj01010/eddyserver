@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using ProtoBuf;
-using org.in2bits.MyXls;
+using SmartXLS;
 
 namespace Eddy.Editor
 {
@@ -21,23 +21,21 @@ namespace Eddy.Editor
             if (!typeof(T).IsDefined(typeof(ProtoContractAttribute), false))
                 throw new InvalidOperationException("只有ProtoBuf类型可以导出");
             //var filestream = new FileStream(path, FileMode.Open, FileAccess.Read);
-            var document = new XlsDocument(path);
-            var sheet = document.Workbook.Worksheets[0];
-            var rows = sheet.Rows;
-            var nameRow = rows[(ushort)rows.MinRow];
-            var columnNameIndex = GetColumnNameIndex(nameRow);
+            var book = new WorkBook();
+            book.read(path);
+            book.Sheet = 0;
+            var columnNameIndex = GetColumnNameIndex(book);
             var list = new List<T>();
 
-            for (uint i = rows.MinRow + 1; i <= rows.MaxRow; ++i)
+            for (int i = 1; i <= book.LastRow; ++i)
             {
-                var row = rows[(ushort)i];
-                list.Add(GetProto<T>(row, columnNameIndex));
+                list.Add(GetProto<T>(book, i, columnNameIndex));
             }
 
             return list;
         }
 
-        private static T GetProto<T>(Row row, Dictionary<string, ushort> columnNameIndex) where T : class, new()
+        private static T GetProto<T>(WorkBook book, int row, Dictionary<string, ushort> columnNameIndex) where T : class, new()
         {
             var proto = new T();
             var properties = typeof(T).GetProperties();
@@ -52,47 +50,51 @@ namespace Eddy.Editor
 
             foreach (var pair in pairs)
             {
-                if (!columnNameIndex.ContainsKey(pair.columnName))
-                    throw new InvalidOperationException("未定义字段：" + pair.columnName);
+                var columnName = pair.columnName;
 
-                var columnIndex = columnNameIndex[pair.columnName];
-                if (row.CellExists(columnIndex))
-                {
-                    var cell = row.CellAtCol(columnIndex);
-                    SetField(proto, pair.propertyName, cell);
-                }
+                if (columnName == null)
+                    columnName = pair.propertyName;
+
+                if (!columnNameIndex.ContainsKey(columnName))
+                    throw new InvalidOperationException("未定义字段：" + columnName);
+
+                var column = columnNameIndex[columnName];
+                var text = book.getText(row, column);
+
+                if (text != null && text.Length != 0)
+                    SetField(proto, pair.propertyName, text);
             }
             return proto;
         }
 
-        private static void SetField(object proto, string name, Cell cell)
+        private static void SetField(object proto, string name, string text)
         {
             var type = proto.GetType();
             var propertyInfo = type.GetProperty(name);
             var propertyType = propertyInfo.PropertyType;
             if (propertyType == typeof(int))
             {
-                propertyInfo.SetValue(proto, int.Parse(cell.Value.ToString()), null);
+                propertyInfo.SetValue(proto, int.Parse(text), null);
             }
             else if (propertyType == typeof(bool))
             {
-                propertyInfo.SetValue(proto, Convert.ToBoolean(int.Parse(cell.Value.ToString())), null);
+                propertyInfo.SetValue(proto, Convert.ToBoolean(int.Parse(text)), null);
             }
             else if (propertyType == typeof(uint))
             {
-                propertyInfo.SetValue(proto, uint.Parse(cell.Value.ToString()), null);
+                propertyInfo.SetValue(proto, uint.Parse(text), null);
             }
             else if (propertyType == typeof(float))
             {
-                propertyInfo.SetValue(proto, float.Parse(cell.Value.ToString()), null);
+                propertyInfo.SetValue(proto, float.Parse(text), null);
             }
             else if (propertyType == typeof(double))
             {
-                propertyInfo.SetValue(proto, double.Parse(cell.Value.ToString()), null);
+                propertyInfo.SetValue(proto, double.Parse(text), null);
             }
             else if (propertyType == typeof(string))
             {
-                propertyInfo.SetValue(proto, cell.Value.ToString(), null);
+                propertyInfo.SetValue(proto, text, null);
             }
             else
             {
@@ -100,13 +102,13 @@ namespace Eddy.Editor
             }
         }
 
-        private static Dictionary<string, ushort> GetColumnNameIndex(Row nameRow)
+        private static Dictionary<string, ushort> GetColumnNameIndex(WorkBook book)
         {
             Dictionary<string, ushort> names = new Dictionary<string, ushort>();
 
-            for (ushort i = nameRow.MinCellCol; i <= nameRow.MaxCellCol; ++i)
+            for (ushort i = 0; i <= book.LastCol; ++i)
             {
-                names.Add(nameRow.GetCell(i).Value as string, nameRow.GetCell(i).Column);
+                names.Add(book.getText(0, i), i);
             }
 
             return names;
