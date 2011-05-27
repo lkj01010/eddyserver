@@ -29,10 +29,23 @@ namespace Eddy.Editor
 
             for (int i = 1; i <= book.LastRow; ++i)
             {
+                if (IsRowEmpty(book, i))
+                    continue;
                 list.Add(GetProto<T>(book, i, columnNameIndex));
             }
 
             return list;
+        }
+
+        private static bool IsRowEmpty(WorkBook book, int row)
+        {
+            for (int col = 0; col <= book.LastCol; ++col)
+            {
+                var text = book.getText(row, col);
+                if (text != null && text.Length > 0)
+                    return false;
+            }
+            return true;
         }
 
         private static T GetProto<T>(WorkBook book, int row, Dictionary<string, ushort> columnNameIndex) where T : class, new()
