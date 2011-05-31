@@ -34,6 +34,14 @@ namespace Eddy.Editor
                 list.Add(GetProto<T>(book, i, columnNameIndex));
             }
 
+            // 如果元素是Comparable的，则排序
+            try
+            {
+                list.Sort();
+            }
+            catch (InvalidOperationException)
+            {
+            }
             return list;
         }
 
@@ -75,12 +83,12 @@ namespace Eddy.Editor
                 var text = book.getText(row, column);
 
                 if (text != null && text.Length != 0)
-                    SetField(proto, pair.propertyName, text);
+                    SetProperty(proto, pair.propertyName, text);
             }
             return proto;
         }
 
-        private static void SetField(object proto, string name, string text)
+        private static void SetProperty(object proto, string name, string text)
         {
             var type = proto.GetType();
             var propertyInfo = type.GetProperty(name);

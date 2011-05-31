@@ -21,11 +21,6 @@ class XlsEditor : EditorWindow
         window.path = path;
     }
 
-    void DoWindow(int id)
-    {
-
-    }
-
     void OnGUI()
     {
         scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
