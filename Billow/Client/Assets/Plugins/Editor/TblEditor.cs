@@ -9,7 +9,7 @@ using ProtoBuf;
 using UnityEngine;
 using UnityEditor;
 
-class TblEditor : EditorWindow
+public class TblEditor : EditorWindow
 {
     private object proto;
     private Vector2 scrollPos;
@@ -24,7 +24,7 @@ class TblEditor : EditorWindow
 
     private static object Deserialize(string path)
     {
-        var assembly = Assembly.GetAssembly(typeof(Common.Tables.TableFileInfo));
+        var assembly = Assembly.GetAssembly(typeof(TableAttribute));
         var type = assembly.GetType("Common.Tables." + Path.GetFileNameWithoutExtension(path));
         var holderType = typeof(Common.Tables.TableHolder<>).MakeGenericType(type);
         MethodInfo method = typeof(ProtoBuf.Serializer).GetMethod("Deserialize", BindingFlags.Static | BindingFlags.Public);
@@ -53,7 +53,7 @@ class TblEditor : EditorWindow
         return properties;
     }
 
-    static private IEnumerable<IEnumerable<string>> GetRows<T>(TableHolder<T> holder, IEnumerable<PropertyInfo> properties)
+    private static IEnumerable<IEnumerable<string>> GetRows<T>(TableHolder<T> holder, IEnumerable<PropertyInfo> properties)
     {
         var rows = from data in holder.Data
                      select (from property in properties

@@ -5,9 +5,9 @@ using System.IO;
 using ProtoBuf;
 using SmartXLS;
 
-namespace Eddy.Editor
+namespace Editor
 {
-    public class ExcelToProto
+    public static class ExcelToProto
     {
         /// <summary>
         /// 把excel文件导出为protobuf对象
@@ -83,7 +83,16 @@ namespace Eddy.Editor
                 var text = book.getText(row, column);
 
                 if (text != null && text.Length != 0)
-                    SetProperty(proto, pair.propertyName, text);
+                {
+                    try
+                    {
+                        SetProperty(proto, pair.propertyName, text);
+                    }
+                    catch (Exception)
+                    {
+                        throw new InvalidCastException("格式错误：第" + row + "行，" + columnName);
+                    }
+                }
             }
             return proto;
         }

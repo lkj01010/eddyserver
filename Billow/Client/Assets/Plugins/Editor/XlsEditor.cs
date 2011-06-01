@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEditor;
 using SmartXLS;
 
-class XlsEditor : EditorWindow
+public class XlsEditor : EditorWindow
 {
     private WorkBook book;
     private string path;
@@ -89,6 +89,7 @@ class XlsEditor : EditorWindow
         if (GUILayout.Button("Save", buttonLayout))
         {
             book.write(path);
+            CustomPostprocessors.OnReimported(path);
         }
     }
 }
