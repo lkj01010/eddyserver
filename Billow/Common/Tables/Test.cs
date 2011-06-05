@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using ProtoBuf;
 
-namespace Common.Tables
+namespace Tables
 {
 	[ProtoContract]
-	[Common.Tables.Table("Test.xls")]
-	class Test
+	[Tables.Table("Test.xls", TableLocations.Client | TableLocations.Server)]
+	public class Test
 	{
 		[ProtoMember(1, Name = "A")]
 		public int A { get; set; }

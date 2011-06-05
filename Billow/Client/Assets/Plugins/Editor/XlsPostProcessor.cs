@@ -19,11 +19,6 @@ namespace Editor
 
         public void OnDeleted(string path)
         {
-            var tblPath = path.Substring(0, path.LastIndexOf(".xls"));
-            tblPath += ".tbl";
-            FileUtil.DeleteFileOrDirectory(tblPath);
-            tblPath += ".meta";
-            FileUtil.DeleteFileOrDirectory(tblPath);
         }
 
         public void OnMoved(string from, string to)

@@ -7,6 +7,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 using SmartXLS;
+using Tables;
 
 namespace Editor
 {
@@ -22,7 +23,7 @@ namespace Editor
             var types = Editor.TableFileInfo.GetTableTypes(fileName);
 
             if (types == null)
-                throw new InvalidOperationException("文件" + fileName + "没有相应的数据类型");
+                throw new InvalidOperationException("文件" + fileName + "没有相应的数据类型，无法导出tbl");
 
             foreach (var type in types)
             {
@@ -34,13 +35,36 @@ namespace Editor
 
         private static void ExportImpl<T>(string xlsPath) where T : class, new()
         {
-            var tblPath = Path.GetDirectoryName(xlsPath) + "/" + typeof(T).Name + ".tbl";
-            ExportImpl<T>(xlsPath, tblPath);
+            var attribute = typeof(T).GetCustomAttributes(
+                typeof(TableAttribute), false)[0] as TableAttribute;
+
+            if ((attribute.Locations & TableLocations.Client) == TableLocations.Client)
+            {
+                var tblPath = "Assets/"
+                    + ClientCore.ResourceManager.BundlesPath + "/Tables";
+
+                if (!Directory.Exists(tblPath))
+                    Directory.CreateDirectory(tblPath);
+
+                tblPath = tblPath + "/" + typeof(T).FullName + ".tbl";
+                ExportImpl<T>(xlsPath, tblPath);
+            }
+
+            if ((attribute.Locations & TableLocations.Server) == TableLocations.Server)
+            {
+                var tblPath = Preferences.GetString("服务器数据导出路径") + "/Tables";
+
+                if (!Directory.Exists(tblPath))
+                    Directory.CreateDirectory(tblPath);
+
+                tblPath =  tblPath +"/" + typeof(T).FullName + ".tbl";
+                ExportImpl<T>(xlsPath, tblPath);
+            }
         }
 
         private static void ExportImpl<T>(string xlsPath, string tblPath) where T : class, new()
         {
-            var tableData = new Common.Tables.TableHolder<T>();
+            var tableData = new Tables.TableHolder<T>();
             tableData.Data = Editor.ExcelToProto.Export<T>(xlsPath);
             var stream = new FileStream(tblPath, FileMode.Create);
             ProtoBuf.Serializer.Serialize(stream, tableData);

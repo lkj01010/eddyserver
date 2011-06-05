@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.IO;
-using Common.Tables;
+using Tables;
 using ProtoBuf;
 using UnityEngine;
 using UnityEditor;
@@ -13,7 +13,6 @@ public class TblEditor : EditorWindow
 {
     private object proto;
     private Vector2 scrollPos;
-
 
     public static void Init(string path)
     {
@@ -25,8 +24,8 @@ public class TblEditor : EditorWindow
     private static object Deserialize(string path)
     {
         var assembly = Assembly.GetAssembly(typeof(TableAttribute));
-        var type = assembly.GetType("Common.Tables." + Path.GetFileNameWithoutExtension(path));
-        var holderType = typeof(Common.Tables.TableHolder<>).MakeGenericType(type);
+        var type = assembly.GetType(Path.GetFileNameWithoutExtension(path));
+        var holderType = typeof(Tables.TableHolder<>).MakeGenericType(type);
         MethodInfo method = typeof(ProtoBuf.Serializer).GetMethod("Deserialize", BindingFlags.Static | BindingFlags.Public);
         MethodInfo generic = method.MakeGenericMethod(holderType);
         var stream = new FileStream(path, FileMode.Open, FileAccess.Read);
@@ -106,6 +105,5 @@ public class TblEditor : EditorWindow
         EditorGUILayout.EndVertical();
         EditorGUILayout.EndScrollView();
     }
-
 }
 

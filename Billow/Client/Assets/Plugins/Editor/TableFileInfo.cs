@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
-using Common.Tables;
+using Tables;
 
 namespace Editor
 {
@@ -13,7 +13,7 @@ namespace Editor
 
         static TableFileInfo()
         {
-            var assembly = Assembly.GetAssembly(typeof(Common.Tables.TableAttribute));
+            var assembly = Assembly.GetAssembly(typeof(TableAttribute));
             var types = from type in assembly.GetTypes()
                         where type.IsDefined(typeof(TableAttribute), false)
                         select type;

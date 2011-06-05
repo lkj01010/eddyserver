@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using ProtoBuf;
 
-namespace Common.Tables
+namespace Tables
 {
     [ProtoContract]
     public class TableHolder<T>
