@@ -89,7 +89,8 @@ public class XlsEditor : EditorWindow
         if (GUILayout.Button("Save", buttonLayout))
         {
             book.write(path);
-            CustomPostprocessors.OnReimported(path);
+            //CustomPostprocessors.OnReimported(path);
+            AssetDatabase.ImportAsset(path);
         }
     }
 }

@@ -9,67 +9,64 @@ using UnityEditor;
 using SmartXLS;
 using Tables;
 
-namespace Editor
+public class TblExporter
 {
-    public class TblExporter
+    public static void Export(string xlsPath)
     {
-        public static void Export(string xlsPath)
+        var extension = Path.GetExtension(xlsPath);
+        if (extension != ".xls")
+            return;
+
+        var fileName = Path.GetFileName(xlsPath);
+        var types = TableFileInfo.GetTableTypes(fileName);
+
+        if (types == null)
+            throw new InvalidOperationException("文件" + fileName + "没有相应的数据类型，无法导出tbl");
+
+        foreach (var type in types)
         {
-            var extension = Path.GetExtension(xlsPath);
-            if (extension != ".xls")
-                return;
+            MethodInfo method = typeof(TblExporter).GetMethod("ExportImpl", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[] { typeof(string) }, null);
+            MethodInfo generic = method.MakeGenericMethod(type);
+            generic.Invoke(null, new object[] { xlsPath });
+        }
+    }
 
-            var fileName = Path.GetFileName(xlsPath);
-            var types = Editor.TableFileInfo.GetTableTypes(fileName);
+    private static void ExportImpl<T>(string xlsPath) where T : class, new()
+    {
+        var attribute = typeof(T).GetCustomAttributes(
+            typeof(TableAttribute), false)[0] as TableAttribute;
 
-            if (types == null)
-                throw new InvalidOperationException("文件" + fileName + "没有相应的数据类型，无法导出tbl");
+        if ((attribute.Locations & TableLocations.Client) == TableLocations.Client)
+        {
+            var tblPath = "Assets/"
+                + ClientCore.ResourceManager.BundlesPath + "/Tables";
 
-            foreach (var type in types)
-            {
-                MethodInfo method = typeof(TblExporter).GetMethod("ExportImpl", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[] { typeof(string) }, null);
-                MethodInfo generic = method.MakeGenericMethod(type);
-                generic.Invoke(null, new object[] { xlsPath });
-            }
+            if (!Directory.Exists(tblPath))
+                Directory.CreateDirectory(tblPath);
+
+            tblPath = tblPath + "/" + typeof(T).FullName + ".tbl";
+            ExportImpl<T>(xlsPath, tblPath);
+            AssetDatabase.ImportAsset(tblPath);
         }
 
-        private static void ExportImpl<T>(string xlsPath) where T : class, new()
+        if ((attribute.Locations & TableLocations.Server) == TableLocations.Server)
         {
-            var attribute = typeof(T).GetCustomAttributes(
-                typeof(TableAttribute), false)[0] as TableAttribute;
+            var tblPath = Preferences.GetString("服务器数据导出路径") + "/Tables";
 
-            if ((attribute.Locations & TableLocations.Client) == TableLocations.Client)
-            {
-                var tblPath = "Assets/"
-                    + ClientCore.ResourceManager.BundlesPath + "/Tables";
+            if (!Directory.Exists(tblPath))
+                Directory.CreateDirectory(tblPath);
 
-                if (!Directory.Exists(tblPath))
-                    Directory.CreateDirectory(tblPath);
-
-                tblPath = tblPath + "/" + typeof(T).FullName + ".tbl";
-                ExportImpl<T>(xlsPath, tblPath);
-                BundleExporter.ExportDirectoryIfNeeded(tblPath);
-            }
-
-            if ((attribute.Locations & TableLocations.Server) == TableLocations.Server)
-            {
-                var tblPath = Preferences.GetString("服务器数据导出路径") + "/Tables";
-
-                if (!Directory.Exists(tblPath))
-                    Directory.CreateDirectory(tblPath);
-
-                tblPath =  tblPath +"/" + typeof(T).FullName + ".tbl";
-                ExportImpl<T>(xlsPath, tblPath);
-            }
+            tblPath = tblPath + "/" + typeof(T).FullName + ".tbl";
+            ExportImpl<T>(xlsPath, tblPath);
         }
+    }
 
-        private static void ExportImpl<T>(string xlsPath, string tblPath) where T : class, new()
-        {
-            var tableData = new Tables.TableHolder<T>();
-            tableData.Data = Editor.ExcelToProto.Export<T>(xlsPath);
-            var stream = new FileStream(tblPath, FileMode.Create);
-            ProtoBuf.Serializer.Serialize(stream, tableData);
-            stream.Close();
-        }
+    private static void ExportImpl<T>(string xlsPath, string tblPath) where T : class, new()
+    {
+        var tableData = new Tables.TableHolder<T>();
+        tableData.Data = ExcelToProto.Export<T>(xlsPath);
+        var stream = new FileStream(tblPath, FileMode.Create);
+        ProtoBuf.Serializer.Serialize(stream, tableData);
+        stream.Close();
     }
 }

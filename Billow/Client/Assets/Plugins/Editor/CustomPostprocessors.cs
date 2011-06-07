@@ -10,11 +10,12 @@ using UnityEngine;
 
 public class CustomPostprocessors : AssetPostprocessor
 {
-    private static Dictionary<string, Editor.IPostprocessor> postprocessors = new Dictionary<string,Editor.IPostprocessor>();
+    private static Dictionary<string, IPostprocessor> postprocessors = new Dictionary<string, IPostprocessor>();
 
     static CustomPostprocessors()
     {
-        postprocessors[".xls"] = new Editor.XlsPostprocessor();
+        postprocessors[".xls"] = new XlsPostprocessor();
+        postprocessors[".tbl"] = new TblPostprocessor();
     }
 
     private static void OnPostprocessAllAssets(

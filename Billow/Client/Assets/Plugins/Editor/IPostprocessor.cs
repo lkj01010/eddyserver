@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Editor
+interface IPostprocessor
 {
-    interface IPostprocessor
-    {
-        void OnReimported(string path);
-        void OnDeleted(string path);
-        void OnMoved(string from, string to);
-    }
+    void OnReimported(string path);
+    void OnDeleted(string path);
+    void OnMoved(string from, string to);
 }

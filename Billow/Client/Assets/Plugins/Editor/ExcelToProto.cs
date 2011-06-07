@@ -5,143 +5,140 @@ using System.IO;
 using ProtoBuf;
 using SmartXLS;
 
-namespace Editor
+public static class ExcelToProto
 {
-    public static class ExcelToProto
+    /// <summary>
+    /// 把excel文件导出为protobuf对象
+    /// 只导出第一个sheet，其中第一行视为列名，列名为protobuf字段属性的Name
+    /// </summary>
+    /// <typeparam name="T">protobuf对象类型</typeparam>
+    /// <param name="file">文件路径</param>
+    /// <returns></returns>
+    public static List<T> Export<T>(string path) where T : class, new()
     {
-        /// <summary>
-        /// 把excel文件导出为protobuf对象
-        /// 只导出第一个sheet，其中第一行视为列名，列名为protobuf字段属性的Name
-        /// </summary>
-        /// <typeparam name="T">protobuf对象类型</typeparam>
-        /// <param name="file">文件路径</param>
-        /// <returns></returns>
-        public static List<T> Export<T>(string path) where T : class, new()
+        if (!typeof(T).IsDefined(typeof(ProtoContractAttribute), false))
+            throw new InvalidOperationException("只有ProtoBuf类型可以导出");
+        //var filestream = new FileStream(path, FileMode.Open, FileAccess.Read);
+        var book = new WorkBook();
+        book.read(path);
+        book.Sheet = 0;
+        var columnNameIndex = GetColumnNameIndex(book);
+        var list = new List<T>();
+
+        for (int i = 1; i <= book.LastRow; ++i)
         {
-            if (!typeof(T).IsDefined(typeof(ProtoContractAttribute), false))
-                throw new InvalidOperationException("只有ProtoBuf类型可以导出");
-            //var filestream = new FileStream(path, FileMode.Open, FileAccess.Read);
-            var book = new WorkBook();
-            book.read(path);
-            book.Sheet = 0;
-            var columnNameIndex = GetColumnNameIndex(book);
-            var list = new List<T>();
-
-            for (int i = 1; i <= book.LastRow; ++i)
-            {
-                if (IsRowEmpty(book, i))
-                    continue;
-                list.Add(GetProto<T>(book, i, columnNameIndex));
-            }
-
-            // 如果元素是Comparable的，则排序
-            try
-            {
-                list.Sort();
-            }
-            catch (InvalidOperationException)
-            {
-            }
-            return list;
+            if (IsRowEmpty(book, i))
+                continue;
+            list.Add(GetProto<T>(book, i, columnNameIndex));
         }
 
-        private static bool IsRowEmpty(WorkBook book, int row)
+        // 如果元素是Comparable的，则排序
+        try
         {
-            for (int col = 0; col <= book.LastCol; ++col)
-            {
-                var text = book.getText(row, col);
-                if (text != null && text.Length > 0)
-                    return false;
-            }
-            return true;
+            list.Sort();
         }
-
-        private static T GetProto<T>(WorkBook book, int row, Dictionary<string, ushort> columnNameIndex) where T : class, new()
+        catch (InvalidOperationException)
         {
-            var proto = new T();
-            var properties = typeof(T).GetProperties();
-            var pairs = from property in properties
-                        where property.IsDefined(typeof(ProtoMemberAttribute), false)
-                        select
-                        new
-                        {
-                            columnName = (Attribute.GetCustomAttribute(property, typeof(ProtoMemberAttribute)) as ProtoMemberAttribute).Name,
-                            propertyName = property.Name
-                        };
+        }
+        return list;
+    }
 
-            foreach (var pair in pairs)
+    private static bool IsRowEmpty(WorkBook book, int row)
+    {
+        for (int col = 0; col <= book.LastCol; ++col)
+        {
+            var text = book.getText(row, col);
+            if (text != null && text.Length > 0)
+                return false;
+        }
+        return true;
+    }
+
+    private static T GetProto<T>(WorkBook book, int row, Dictionary<string, ushort> columnNameIndex) where T : class, new()
+    {
+        var proto = new T();
+        var properties = typeof(T).GetProperties();
+        var pairs = from property in properties
+                    where property.IsDefined(typeof(ProtoMemberAttribute), false)
+                    select
+                    new
+                    {
+                        columnName = (Attribute.GetCustomAttribute(property, typeof(ProtoMemberAttribute)) as ProtoMemberAttribute).Name,
+                        propertyName = property.Name
+                    };
+
+        foreach (var pair in pairs)
+        {
+            var columnName = pair.columnName;
+
+            if (columnName == null)
+                columnName = pair.propertyName;
+
+            if (!columnNameIndex.ContainsKey(columnName))
+                throw new InvalidOperationException("未定义字段：" + columnName);
+
+            var column = columnNameIndex[columnName];
+            var text = book.getText(row, column);
+
+            if (text != null && text.Length != 0)
             {
-                var columnName = pair.columnName;
-
-                if (columnName == null)
-                    columnName = pair.propertyName;
-
-                if (!columnNameIndex.ContainsKey(columnName))
-                    throw new InvalidOperationException("未定义字段：" + columnName);
-
-                var column = columnNameIndex[columnName];
-                var text = book.getText(row, column);
-
-                if (text != null && text.Length != 0)
+                try
                 {
-                    try
-                    {
-                        SetProperty(proto, pair.propertyName, text);
-                    }
-                    catch (Exception)
-                    {
-                        throw new InvalidCastException("格式错误：第" + row + "行，" + columnName);
-                    }
+                    SetProperty(proto, pair.propertyName, text);
+                }
+                catch (Exception)
+                {
+                    throw new InvalidCastException("格式错误：第" + row + "行，" + columnName);
                 }
             }
-            return proto;
         }
+        return proto;
+    }
 
-        private static void SetProperty(object proto, string name, string text)
+    private static void SetProperty(object proto, string name, string text)
+    {
+        var type = proto.GetType();
+        var propertyInfo = type.GetProperty(name);
+        var propertyType = propertyInfo.PropertyType;
+        if (propertyType == typeof(int))
         {
-            var type = proto.GetType();
-            var propertyInfo = type.GetProperty(name);
-            var propertyType = propertyInfo.PropertyType;
-            if (propertyType == typeof(int))
-            {
-                propertyInfo.SetValue(proto, int.Parse(text), null);
-            }
-            else if (propertyType == typeof(bool))
-            {
-                propertyInfo.SetValue(proto, Convert.ToBoolean(int.Parse(text)), null);
-            }
-            else if (propertyType == typeof(uint))
-            {
-                propertyInfo.SetValue(proto, uint.Parse(text), null);
-            }
-            else if (propertyType == typeof(float))
-            {
-                propertyInfo.SetValue(proto, float.Parse(text), null);
-            }
-            else if (propertyType == typeof(double))
-            {
-                propertyInfo.SetValue(proto, double.Parse(text), null);
-            }
-            else if (propertyType == typeof(string))
-            {
-                propertyInfo.SetValue(proto, text, null);
-            }
-            else
-            {
-                throw new InvalidOperationException("不支持的类型：" + propertyType);
-            }
+            propertyInfo.SetValue(proto, int.Parse(text), null);
         }
-
-        private static Dictionary<string, ushort> GetColumnNameIndex(WorkBook book)
+        else if (propertyType == typeof(bool))
         {
-            Dictionary<string, ushort> names = new Dictionary<string, ushort>();
-
-            for (ushort i = 0; i <= book.LastCol; ++i)
-            {
-                names.Add(book.getText(0, i), i);
-            }
-
-            return names;
+            propertyInfo.SetValue(proto, Convert.ToBoolean(int.Parse(text)), null);
         }
+        else if (propertyType == typeof(uint))
+        {
+            propertyInfo.SetValue(proto, uint.Parse(text), null);
+        }
+        else if (propertyType == typeof(float))
+        {
+            propertyInfo.SetValue(proto, float.Parse(text), null);
+        }
+        else if (propertyType == typeof(double))
+        {
+            propertyInfo.SetValue(proto, double.Parse(text), null);
+        }
+        else if (propertyType == typeof(string))
+        {
+            propertyInfo.SetValue(proto, text, null);
+        }
+        else
+        {
+            throw new InvalidOperationException("不支持的类型：" + propertyType);
+        }
+    }
+
+    private static Dictionary<string, ushort> GetColumnNameIndex(WorkBook book)
+    {
+        Dictionary<string, ushort> names = new Dictionary<string, ushort>();
+
+        for (ushort i = 0; i <= book.LastCol; ++i)
+        {
+            names.Add(book.getText(0, i), i);
+        }
+
+        return names;
     }
 }
