@@ -10,13 +10,33 @@ using UnityEditor;
 
 public class BundleExporter
 {
-    [MenuItem("Eddy/Export Bundles")]
-    public static void ExportBundles()
+    private static readonly string bundlePath = "Assets/" + ResourceManager.BundlesPath + "/";
+
+    [MenuItem("Eddy/Export All Bundles")]
+    public static void ExportAllBundles()
     {
         ExportDirectory("Assets/" + ResourceManager.BundlesPath);
     }
 
-    public static void ExportDirectory(string path)
+    [MenuItem("Assets/Export Bundles")]
+    public static void ExportBundles()
+    {
+        var path = AssetDatabase.GetAssetPath(Selection.activeObject);
+        if (File.Exists(path))
+            ExportBundleIfNeeded(path);
+        else if (Directory.Exists(path))
+            ExportDirectoryIfNeeded(path);
+    }
+
+    public static void ExportDirectoryIfNeeded(string path)
+    {
+        if (!path.StartsWith(bundlePath))
+            return;
+
+        ExportDirectory(path);
+    }
+
+    private static void ExportDirectory(string path)
     {
         string[] files = Directory.GetFiles(path);
         foreach (string file in files)
@@ -33,41 +53,39 @@ public class BundleExporter
         }
     }
 
-    public static void ExportBundle(string path)
+    public static void ExportBundleIfNeeded(string path)
     {
-        var bundlePath = "Assets/" + ResourceManager.BundlesPath + "/";
-		
         if (!path.StartsWith(bundlePath))
             return;
-		
+
+        ExportBundle(path);
+    }
+
+    private static void ExportBundle(string path)
+    {
         var relativePath = path.Substring(bundlePath.Length);
         var exportFileName = ResourceManager.GetExportFileName(relativePath);
         var exportPath = ResourceManager.BundlesPath + "/" + exportFileName;
-		
-		if (!Directory.Exists(ResourceManager.BundlesPath)) 
-                Directory.CreateDirectory(ResourceManager.BundlesPath);
 
-        if (ExportBundle(path, exportPath))
+        if (!Directory.Exists(ResourceManager.BundlesPath))
+            Directory.CreateDirectory(ResourceManager.BundlesPath);
+
+        if (ExportBundleWithoutMetaData(path, exportPath))
         {
             WriteMetaData(relativePath);
             Debug.Log(exportPath + " 导出成功。");
         }
     }
 
-    private static bool ExportBundle(string path, string exportPath)
+    private static bool ExportBundleWithoutMetaData(string path, string exportPath)
     {
         if (ResourceManager.IsExportable(path))
         {
-            FileUtil.CopyFileOrDirectory(path, exportPath);
+            ExportExportable(path, exportPath);
         }
         else if (ResourceManager.IsPackedExportable(path))
         {
-            var obj = AssetDatabase.LoadMainAssetAtPath(path);
-            if (!BuildPipeline.BuildAssetBundle(obj, null, exportPath,
-                BuildAssetBundleOptions.CollectDependencies | BuildAssetBundleOptions.CompleteAssets))
-            {
-                throw new InvalidOperationException(exportPath + " 导出失败。");
-            }
+            ExportPackedExportable(path, exportPath);
         }
         else
         {
@@ -77,25 +95,61 @@ public class BundleExporter
         return true;
     }
 
+    private static void ExportExportable(string path, string exportPath)
+    {
+        FileUtil.CopyFileOrDirectory(path, exportPath);
+    }
+
+    private static void ExportPackedExportable(string path, string exportPath)
+    {
+        var obj = AssetDatabase.LoadMainAssetAtPath(path);
+        if (!BuildPipeline.BuildAssetBundle(obj, null, exportPath,
+            BuildAssetBundleOptions.CollectDependencies | BuildAssetBundleOptions.CompleteAssets))
+        {
+            throw new InvalidOperationException(exportPath + " 导出失败。");
+        }
+    }
+
     private static void WriteMetaData(string relativePath)
     {
-        var xmlFile = Path.GetDirectoryName(relativePath);
-        xmlFile += "/meta.xml";
-        xmlFile = ResourceManager.BundlesPath + "/" 
-            + ResourceManager.GetExportFileName(xmlFile);
+        var xmlFileName = GetXmlFileName(relativePath);
+        var xmlPath = ResourceManager.BundlesPath + "/" + xmlFileName;
 
+        WriteXml(relativePath, xmlPath);
+
+        if (xmlFileName != "Meta.xml")
+            WriteMetaData(xmlFileName);
+    }
+
+    private static void WriteXml(string relativePath, string xmlPath)
+    {
+        XmlDocument xmlDoc = GetXmlDocument(xmlPath);
+
+        var node = GetXmlNode(xmlDoc, relativePath);
+        SetXmlNodeMD5(relativePath, node);
+
+        xmlDoc.Save(xmlPath);
+    }
+
+    private static void SetXmlNodeMD5(string relativePath, XmlElement node)
+    {
+        string md5 = GetFileMD5(ResourceManager.BundlesPath + "/" +
+            ResourceManager.GetExportFileName(relativePath));
+        node.SetAttribute("md5", md5);
+    }
+
+    private static XmlDocument GetXmlDocument(string xmlPath)
+    {
         XmlDocument xmlDoc = new XmlDocument();
 
-        if (File.Exists(xmlFile))
-            xmlDoc.Load(xmlFile);
+        if (File.Exists(xmlPath))
+            xmlDoc.Load(xmlPath);
+        return xmlDoc;
+    }
 
-        var root = xmlDoc.SelectSingleNode("root");
-
-        if (root == null)
-        {
-            root = xmlDoc.CreateElement("root");
-            xmlDoc.AppendChild(root);
-        }
+    private static XmlElement GetXmlNode(XmlDocument xmlDoc, string relativePath)
+    {
+        var root = GetXmlRoot(xmlDoc);
 
         var node = (root.SelectSingleNode("file[@path = '" + relativePath + "']") as XmlElement);
 
@@ -105,12 +159,31 @@ public class BundleExporter
             node.SetAttribute("path", relativePath);
             root.AppendChild(node);
         }
+        return node;
+    }
 
-        string md5 = GetFileMD5(ResourceManager.BundlesPath + "/" + 
-            ResourceManager.GetExportFileName(relativePath));
-        node.SetAttribute("md5", md5);
+    private static XmlNode GetXmlRoot(XmlDocument xmlDoc)
+    {
+        var root = xmlDoc.SelectSingleNode("root");
 
-        xmlDoc.Save(xmlFile);
+        if (root == null)
+        {
+            root = xmlDoc.CreateElement("root");
+            xmlDoc.AppendChild(root);
+        }
+        return root;
+    }
+
+    private static string GetXmlFileName(string relativePath)
+    {
+        var xmlFileName = Path.GetDirectoryName(relativePath);
+
+        if (xmlFileName != null && xmlFileName.Length > 0)
+            xmlFileName += "/";
+
+        xmlFileName += "Meta.xml";
+        xmlFileName = ResourceManager.GetExportFileName(xmlFileName);
+        return xmlFileName;
     }
 
     private static string GetFileMD5(string path)

@@ -48,6 +48,7 @@ namespace Editor
 
                 tblPath = tblPath + "/" + typeof(T).FullName + ".tbl";
                 ExportImpl<T>(xlsPath, tblPath);
+                BundleExporter.ExportDirectoryIfNeeded(tblPath);
             }
 
             if ((attribute.Locations & TableLocations.Server) == TableLocations.Server)
