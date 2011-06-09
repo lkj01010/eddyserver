@@ -4,6 +4,7 @@ using System.Collections;
 using System.Text;
 using System.IO;
 using System.Xml;
+using System.Linq;
 using ClientCore;
 using UnityEngine;
 using UnityEditor;
@@ -36,6 +37,21 @@ public class BundleExporter
         ExportDirectory(path);
     }
 
+    public static void ExportBundleIfNeeded(string path)
+    {
+        if (!path.StartsWith(bundlePath))
+            return;
+
+        ExportBundle(path);
+    }
+
+    private static string GetRelativePath(string path)
+    {
+        if (!path.StartsWith(bundlePath))
+            throw new InvalidOperationException("路径不在Assets/Bundles下。");
+        return path.Substring(bundlePath.Length);
+    }
+
     private static void ExportDirectory(string path)
     {
         string[] files = Directory.GetFiles(path);
@@ -53,31 +69,85 @@ public class BundleExporter
         }
     }
 
-    public static void ExportBundleIfNeeded(string path)
-    {
-        if (!path.StartsWith(bundlePath))
-            return;
-
-        ExportBundle(path);
-    }
-
     private static void ExportBundle(string path)
     {
-        var relativePath = path.Substring(bundlePath.Length);
-        var exportFileName = ResourceManager.GetExportFileName(relativePath);
-        var exportPath = ResourceManager.BundlesPath + "/" + exportFileName;
+        Dictionary<string, int> dependencyTree = BuildDependencyTree(path);
+        var sorted = (from dependency in dependencyTree
+                      group dependency by dependency.Value into g
+                      select new { Layer = g.Key, Dependencies = from pair in g select pair.Key })
+                     .OrderByDescending((x) => x.Layer);
 
-        if (!Directory.Exists(ResourceManager.BundlesPath))
-            Directory.CreateDirectory(ResourceManager.BundlesPath);
-
-        if (ExportBundleWithoutMetaData(path, exportPath))
+        for (int i = 0; i < sorted.Count(); ++i)
         {
-            WriteMetaData(relativePath);
-            Debug.Log(exportPath + " 导出成功。");
+            BuildPipeline.PushAssetDependencies();
+
+            foreach (var dependency in sorted.ElementAt(i).Dependencies)
+            {
+                var relativePath = GetRelativePath(dependency);
+                var exportFileName = ResourceManager.GetExportFileName(relativePath);
+                var exportPath = ResourceManager.BundlesPath + "/" + exportFileName;
+
+                if (!Directory.Exists(ResourceManager.BundlesPath))
+                    Directory.CreateDirectory(ResourceManager.BundlesPath);
+
+                IEnumerable<string> lowerDependencies = null;
+
+                if (i < sorted.Count() && i > 0)
+                    lowerDependencies = sorted.ElementAt(i - 1).Dependencies;
+
+                if (ExportBundleWithoutMetaData(dependency, exportPath))
+                {
+                    WriteMetaData(relativePath, lowerDependencies);
+                    Debug.Log(exportPath + " 导出成功。");
+                }
+            }
+        }
+		
+        for (int i = 0; i < sorted.Count(); ++i)
+        {
+            BuildPipeline.PopAssetDependencies();
         }
     }
 
-    private static bool ExportBundleWithoutMetaData(string path, string exportPath)
+    private static Dictionary<string, int> BuildDependencyTree(string path)
+    {
+        var dictionary = new Dictionary<string, int>();
+        int layer = 0;
+        dictionary[path] = layer;
+		
+        while (dictionary.Values.Any((x) => x == layer))
+        {
+            var layerElements = (from element in dictionary
+                                where element.Value == layer
+                                select element).ToList();
+            ++layer;
+            foreach (var element in layerElements)
+            {
+                foreach (var dependency in GetDependencies(element.Key))
+                {
+                    dictionary[dependency] = layer;
+                }
+            }
+        }
+
+        return dictionary;
+    }
+
+    private static IEnumerable<string> GetDependencies(string path)
+    {
+        var asset = AssetDatabase.LoadMainAssetAtPath(path);
+
+        var dependencies = (from obj in EditorUtility.CollectDependencies(new[] { asset })
+                            let objPath = AssetDatabase.GetAssetPath(obj)
+                            where objPath.StartsWith(bundlePath)
+                            && objPath != path 
+                            && ResourceManager.IsPackedExportable(objPath)
+                            select objPath).Distinct();
+        return dependencies;
+    }
+
+    private static bool ExportBundleWithoutMetaData(string path,
+        string exportPath)
     {
         if (ResourceManager.IsExportable(path))
         {
@@ -103,35 +173,53 @@ public class BundleExporter
     private static void ExportPackedExportable(string path, string exportPath)
     {
         var obj = AssetDatabase.LoadMainAssetAtPath(path);
-        if (!BuildPipeline.BuildAssetBundle(obj, null, exportPath,
-            BuildAssetBundleOptions.CollectDependencies | BuildAssetBundleOptions.CompleteAssets))
+        var options = (BuildAssetBundleOptions.CollectDependencies | BuildAssetBundleOptions.CompleteAssets
+            | BuildAssetBundleOptions.DeterministicAssetBundle);
+        if (!BuildPipeline.BuildAssetBundle(obj, null, exportPath, options))
         {
             throw new InvalidOperationException(exportPath + " 导出失败。");
         }
     }
 
-    private static void WriteMetaData(string relativePath)
+    private static void WriteMetaData(string relativePath, IEnumerable<string> dependencies)
     {
         var xmlFileName = GetXmlFileName(relativePath);
         var xmlPath = ResourceManager.BundlesPath + "/" + xmlFileName;
 
-        WriteXml(relativePath, xmlPath);
+        var doc = GetXmlDocument(xmlPath);
+
+        var node = InitXmlNode(doc, relativePath);
+        SetXmlNodeFilePath(node, relativePath);
+        SetXmlNodeMD5(node, relativePath);
+        SetXmlNodeDependencies(doc, node, dependencies);
+
+        doc.Save(xmlPath);
 
         if (xmlFileName != "Meta.xml")
-            WriteMetaData(xmlFileName);
+            WriteMetaData(xmlFileName, null);
     }
 
-    private static void WriteXml(string relativePath, string xmlPath)
+    private static void SetXmlNodeFilePath(XmlElement node, string relativePath)
     {
-        XmlDocument xmlDoc = GetXmlDocument(xmlPath);
-
-        var node = GetXmlNode(xmlDoc, relativePath);
-        SetXmlNodeMD5(relativePath, node);
-
-        xmlDoc.Save(xmlPath);
+        node.SetAttribute("path", relativePath);
     }
 
-    private static void SetXmlNodeMD5(string relativePath, XmlElement node)
+    private static void SetXmlNodeDependencies(XmlDocument doc, 
+        XmlElement node, 
+        IEnumerable<string> dependencies)
+    {
+        if (dependencies == null)
+            return;
+
+        foreach (var dependency in dependencies)
+        {
+            var child = doc.CreateElement("dependency");
+            child.SetAttribute("path", GetRelativePath(dependency));
+            node.AppendChild(child);
+        }
+    }
+
+    private static void SetXmlNodeMD5(XmlElement node, string relativePath)
     {
         string md5 = GetFileMD5(ResourceManager.BundlesPath + "/" +
             ResourceManager.GetExportFileName(relativePath));
@@ -140,14 +228,14 @@ public class BundleExporter
 
     private static XmlDocument GetXmlDocument(string xmlPath)
     {
-        XmlDocument xmlDoc = new XmlDocument();
+        XmlDocument doc = new XmlDocument();
 
         if (File.Exists(xmlPath))
-            xmlDoc.Load(xmlPath);
-        return xmlDoc;
+            doc.Load(xmlPath);
+        return doc;
     }
 
-    private static XmlElement GetXmlNode(XmlDocument xmlDoc, string relativePath)
+    private static XmlElement InitXmlNode(XmlDocument xmlDoc, string relativePath)
     {
         var root = GetXmlRoot(xmlDoc);
 
@@ -156,8 +244,11 @@ public class BundleExporter
         if (node == null)
         {
             node = xmlDoc.CreateElement("file");
-            node.SetAttribute("path", relativePath);
             root.AppendChild(node);
+        }
+        else
+        {
+            node.RemoveAll();
         }
         return node;
     }

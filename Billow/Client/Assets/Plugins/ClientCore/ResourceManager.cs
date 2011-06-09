@@ -19,7 +19,7 @@ namespace ClientCore
         /// <summary>
         /// 需要打包成AssetBundle后导出的文件类型
         /// </summary>
-        public static readonly string[] PackedExportableFileTypes = { ".prefab" };
+        public static readonly string[] PackedExportableFileTypes = { ".prefab", ".fbx", };
 
         public static string GetExportFileName(string assetPath)
         {
@@ -30,12 +30,14 @@ namespace ClientCore
         public static bool IsExportable(string path)
         {
             var extension = path.Substring(path.LastIndexOf('.'));
+			extension = extension.ToLower();
             return ExportableFileTypes.Contains(extension);
         }
 
         public static bool IsPackedExportable(string path)
         {
             var extension = path.Substring(path.LastIndexOf('.'));
+			extension = extension.ToLower();
             return PackedExportableFileTypes.Contains(extension);
         }
     }
