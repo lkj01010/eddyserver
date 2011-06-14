@@ -8,7 +8,8 @@ public class Preferences : EditorWindow
 {
     private static Dictionary<string, string> defaultPrefs = new Dictionary<string, string>()
     {
-        {"服务器数据导出路径", Application.dataPath + "/../../ServerData" }
+        {"服务器资源导出路径", Application.dataPath + "/../../ServerData" },
+        {"客户端资源导出路径", Application.dataPath + "/../RemoteBundles" }
     };
 
     [MenuItem("Eddy/Preferences")]

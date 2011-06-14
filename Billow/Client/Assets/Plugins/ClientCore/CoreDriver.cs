@@ -12,6 +12,8 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class CoreDriver : MonoBehaviour
 {
+    public event Action OnUpdate;
+
     private void Awake()
     {
         Init();
@@ -28,6 +30,10 @@ public class CoreDriver : MonoBehaviour
     private void Update()
     {
         Init();
+
+        if (OnUpdate != null)
+            OnUpdate();
+
         Eddy.SimpleDispatcher.CurrentDispatcher.Update();
     }
 }

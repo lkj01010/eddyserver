@@ -51,7 +51,7 @@ public class TblExporter
 
         if ((attribute.Locations & TableLocations.Server) == TableLocations.Server)
         {
-            var tblPath = Preferences.GetString("服务器数据导出路径") + "/Tables";
+            var tblPath = Preferences.GetString("服务器资源导出路径") + "/Tables";
 
             if (!Directory.Exists(tblPath))
                 Directory.CreateDirectory(tblPath);
@@ -65,6 +65,7 @@ public class TblExporter
     {
         var tableData = new Tables.TableHolder<T>();
         tableData.Data = ExcelToProto.Export<T>(xlsPath);
+
         var stream = new FileStream(tblPath, FileMode.Create);
         ProtoBuf.Serializer.Serialize(stream, tableData);
         stream.Close();

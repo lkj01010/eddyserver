@@ -85,10 +85,10 @@ public class BundleExporter
             {
                 var relativePath = GetRelativePath(dependency);
                 var exportFileName = ResourceManager.GetExportFileName(relativePath);
-                var exportPath = ResourceManager.BundlesPath + "/" + exportFileName;
+                var exportPath = Preferences.GetString("客户端资源导出路径") + "/" + exportFileName;
 
-                if (!Directory.Exists(ResourceManager.BundlesPath))
-                    Directory.CreateDirectory(ResourceManager.BundlesPath);
+                if (!Directory.Exists(Preferences.GetString("客户端资源导出路径")))
+                    Directory.CreateDirectory(Preferences.GetString("客户端资源导出路径"));
 
                 IEnumerable<string> lowerDependencies = null;
 
@@ -184,7 +184,7 @@ public class BundleExporter
     private static void WriteMetaData(string relativePath, IEnumerable<string> dependencies)
     {
         var xmlFileName = GetXmlFileName(relativePath);
-        var xmlPath = ResourceManager.BundlesPath + "/" + xmlFileName;
+        var xmlPath = Preferences.GetString("客户端资源导出路径") + "/" + xmlFileName;
 
         var doc = GetXmlDocument(xmlPath);
 
@@ -221,7 +221,7 @@ public class BundleExporter
 
     private static void SetXmlNodeMD5(XmlElement node, string relativePath)
     {
-        string md5 = GetFileMD5(ResourceManager.BundlesPath + "/" +
+        string md5 = GetFileMD5(Preferences.GetString("客户端资源导出路径") + "/" +
             ResourceManager.GetExportFileName(relativePath));
         node.SetAttribute("md5", md5);
     }
