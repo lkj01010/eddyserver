@@ -59,9 +59,6 @@
     <Compile Include="UtilityTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AuthoringTests.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Eddy\Eddy.csproj">
       <Project>{B3F5C7B4-E588-4A58-85FB-9DAD7E0FEC40}</Project>
       <Name>Eddy</Name>
