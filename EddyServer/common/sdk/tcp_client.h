@@ -42,7 +42,7 @@ class TCPClient {
   typedef boost::function<SessionFilterPointer ()>          SessionFilterCreator;
 
   // ====================  LIFECYCLE     =======================================
-  TCPClient(const boost::asio::ip::tcp::resolver_query& query,
+  TCPClient(const boost::asio::ip::tcp::resolver::query& query,
             TCPIOThreadManager& io_thread_manager,
             const SessionHandlerCreator& session_handler_creator,
             const SessionFilterCreator& session_filter_creator);

@@ -30,7 +30,7 @@ namespace eddy {
 using namespace std;
 using boost::asio::ip::tcp;
 
-TCPClient::TCPClient(const tcp::resolver_query& query,
+TCPClient::TCPClient(const boost::asio::ip::tcp::resolver::query& query,
                      TCPIOThreadManager& io_thread_manager,
                      const SessionHandlerCreator& session_handler_creator,
                      const SessionFilterCreator& session_filter_creator) 

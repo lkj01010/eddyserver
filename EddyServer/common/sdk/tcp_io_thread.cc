@@ -27,7 +27,6 @@
 
 namespace eddy { 
 
-using namespace std;
 using namespace boost;
 
 TCPIOThread::TCPIOThread(TCPIOThreadID id, TCPIOThreadManager& manager) 
