@@ -3,18 +3,18 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Eddy.ProtoBufConnection.Net;
-using Eddy.ProtoBufConnection.Message;
+using Eddy.ProtoBufMessage;
 using ProtoBuf;
 using Eddy;
+using Eddy.Net;
 using System.Net;
 
 namespace EddyTest
 {
     [TestClass]
-    public class NetworkTest
+    public class ProtoBufConnectionTest
     {
-        public NetworkTest()
+        public ProtoBufConnectionTest()
         {
         }
 
@@ -36,8 +36,8 @@ namespace EddyTest
             }
         }
 
-        ProtoBufTcpClient client;
-        ProtoBufTcpService service;
+        MessageTcpClient client;
+        MessageTcpService service;
 
         [ProtoContract]
         class Message
@@ -59,7 +59,7 @@ namespace EddyTest
             bool done = false;
 
             // 初始化client
-            client = new ProtoBufTcpClient(serializer, (session, o) =>
+            client = new MessageTcpClient(serializer, (session, o) =>
             {
                 dispatcher.Invoke(() =>
                     {
@@ -75,7 +75,7 @@ namespace EddyTest
                 };
 
             // 初始化service
-            service = new ProtoBufTcpService(serializer, (session, o) =>
+            service = new MessageTcpService (serializer, (session, o) =>
             {
                 dispatcher.Invoke(() =>
                     {

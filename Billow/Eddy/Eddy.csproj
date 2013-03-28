@@ -92,8 +92,13 @@
     <Compile Include="Extensions\SortedListExtensions.cs" />
     <Compile Include="MD5Hash.cs" />
     <Compile Include="Coroutine\MessageDispatcher.cs" />
+    <Compile Include="Message\ExecuteAttribute.cs" />
+    <Compile Include="Message\IMessageSerializer.cs" />
+    <Compile Include="Message\MessageHandlers.cs" />
     <Compile Include="Net\PackageHead.cs" />
     <Compile Include="Net\PackageHeadFlags.cs" />
+    <Compile Include="Net\MessageTcpClient.cs" />
+    <Compile Include="Net\MessageTcpService.cs" />
     <Compile Include="OneShotEvent.cs" />
     <Compile Include="SimpleDispatcher.cs" />
     <Compile Include="Singleton.cs" />

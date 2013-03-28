@@ -6,13 +6,13 @@ using System.IO;
 using System.Reflection;
 using System.Diagnostics;
 
-namespace Eddy.ProtoBufConnection.Message
+namespace Eddy.ProtoBufMessage
 {
 	/// <summary>
 	/// <see cref="ProtoBuf.IExtensible"/>对象和字节流间的编码器
 	/// </summary>
 	/// <remarks>性能分析参见：http://www.servicestack.net/benchmarks/NorthwindDatabaseRowsSerialization.100000-times.2010-08-17.html </remarks>
-	public class MessageSerializer
+	public class MessageSerializer : Eddy.Message.IMessageSerializer
 	{
 		private readonly Dictionary<MessageTypeID, Func<Stream, object>> deserializeTable = new Dictionary<MessageTypeID, Func<Stream, object>>();
 		private readonly Dictionary<Type, MessageTypeID> messageTypeTable = new Dictionary<Type, MessageTypeID>();

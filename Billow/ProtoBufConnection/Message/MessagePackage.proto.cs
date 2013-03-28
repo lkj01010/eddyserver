@@ -8,7 +8,7 @@
 //------------------------------------------------------------------------------
 
 // Generated from: MessagePackage/MessagePackage.proto
-namespace Eddy.ProtoBufConnection.Message
+namespace Eddy.ProtoBufMessage
 {
   [global::System.Serializable, global::ProtoBuf.ProtoContract(Name=@"MessagePackage")]
   public partial class MessagePackage : global::ProtoBuf.IExtensible

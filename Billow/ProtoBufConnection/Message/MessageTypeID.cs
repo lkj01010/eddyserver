@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Eddy.ProtoBufConnection.Message
+namespace Eddy.ProtoBufMessage
 {
 	/// <summary>
 	/// 用数字表示的<see cref="ProtoBuf.IExtensible"/>消息类型

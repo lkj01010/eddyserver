@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Eddy.ProtoBufConnection.Message;
+using Eddy.Message;
 using Eddy.Net;
 using System.IO;
 using System.Diagnostics;
 
-namespace Eddy.ProtoBufConnection.Net
+namespace Eddy.Net
 {
 	/// <summary>
-	/// 基于<see cref="ProtoBuf.IExtensible"/>消息的网络客户端
+	/// 基于消息的网络客户端
 	/// </summary>
-	sealed public class ProtoBufTcpClient : TcpClient
+	sealed public class MessageTcpClient : TcpClient
 	{
-        private ProtoBufTcpHandlers handlers;
+        private MessageHandlers handlers;
 
         public event Action Connected;
         public event Action<Exception> Disconnected;
@@ -24,16 +24,16 @@ namespace Eddy.ProtoBufConnection.Net
             remove { handlers.MessageDeserializeFailed -= value; }
         }
 
-		public ProtoBufTcpClient(MessageSerializer serializer, 
+		public MessageTcpClient(IMessageSerializer serializer, 
             Action<TcpSession, object> messageHandler) :
             this (serializer, messageHandler, () => new TcpSession())
         {
         }
 
-        public ProtoBufTcpClient(MessageSerializer serializer,
+        public MessageTcpClient(IMessageSerializer serializer,
             Action<TcpSession, object> messageHandler, Func<TcpSession> creator)
         {
-            handlers = new ProtoBufTcpHandlers(serializer);
+            handlers = new MessageHandlers(serializer);
             base.Initialize(() =>
             {
                 var session = creator();
