@@ -4,15 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0BD32BC4-F5B9-465A-AF0F-E5C44938D111}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{E98BB316-7DF8-4F18-8C7B-11472653DD20}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JsonFxConnection</RootNamespace>
-    <AssemblyName>JsonFxConnection</AssemblyName>
+    <RootNamespace>EchoClient</RootNamespace>
+    <AssemblyName>EchoClient</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -30,9 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="JsonFx.Json">
-      <HintPath>..\3Party\JsonFx\JsonFx.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -42,14 +41,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Message\MessagePackage.cs" />
-    <Compile Include="Message\MessageSerializer.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Eddy\Eddy.csproj">
       <Project>{b3f5c7b4-e588-4a58-85fb-9dad7e0fec40}</Project>
       <Name>Eddy</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JsonFxMessage\JsonFxMessage.csproj">
+      <Project>{0bd32bc4-f5b9-465a-af0f-e5c44938d111}</Project>
+      <Name>JsonFxMessage</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

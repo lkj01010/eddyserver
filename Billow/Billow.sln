@@ -5,9 +5,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eddy", "Eddy\Eddy.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EddyTest", "EddyTest\EddyTest.csproj", "{8F73E6C3-8436-40C0-957F-58E713BC3C02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtoBufMessage", "ProtoBufConnection\ProtoBufMessage.csproj", "{EFE0EDF4-81A6-42AE-B3AD-54185286A818}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoServer", "EchoServer\EchoServer.csproj", "{FCD53C28-380F-4B76-9A7D-06E3AB22FE7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonFxMessage", "JsonFxConnection\JsonFxMessage.csproj", "{0BD32BC4-F5B9-465A-AF0F-E5C44938D111}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonFxMessage", "JsonFxMessage\JsonFxMessage.csproj", "{0BD32BC4-F5B9-465A-AF0F-E5C44938D111}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtoBufMessage", "ProtoBufMessage\ProtoBufMessage.csproj", "{EFE0EDF4-81A6-42AE-B3AD-54185286A818}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoClient", "EchoClient\EchoClient.csproj", "{E98BB316-7DF8-4F18-8C7B-11472653DD20}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -26,14 +30,22 @@ Global
 		{8F73E6C3-8436-40C0-957F-58E713BC3C02}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F73E6C3-8436-40C0-957F-58E713BC3C02}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F73E6C3-8436-40C0-957F-58E713BC3C02}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EFE0EDF4-81A6-42AE-B3AD-54185286A818}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EFE0EDF4-81A6-42AE-B3AD-54185286A818}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EFE0EDF4-81A6-42AE-B3AD-54185286A818}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EFE0EDF4-81A6-42AE-B3AD-54185286A818}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCD53C28-380F-4B76-9A7D-06E3AB22FE7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCD53C28-380F-4B76-9A7D-06E3AB22FE7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCD53C28-380F-4B76-9A7D-06E3AB22FE7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCD53C28-380F-4B76-9A7D-06E3AB22FE7E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0BD32BC4-F5B9-465A-AF0F-E5C44938D111}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0BD32BC4-F5B9-465A-AF0F-E5C44938D111}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BD32BC4-F5B9-465A-AF0F-E5C44938D111}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BD32BC4-F5B9-465A-AF0F-E5C44938D111}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFE0EDF4-81A6-42AE-B3AD-54185286A818}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFE0EDF4-81A6-42AE-B3AD-54185286A818}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFE0EDF4-81A6-42AE-B3AD-54185286A818}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFE0EDF4-81A6-42AE-B3AD-54185286A818}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E98BB316-7DF8-4F18-8C7B-11472653DD20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E98BB316-7DF8-4F18-8C7B-11472653DD20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E98BB316-7DF8-4F18-8C7B-11472653DD20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E98BB316-7DF8-4F18-8C7B-11472653DD20}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

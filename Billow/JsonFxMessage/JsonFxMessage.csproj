@@ -4,13 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{EFE0EDF4-81A6-42AE-B3AD-54185286A818}</ProjectGuid>
+    <ProjectGuid>{0BD32BC4-F5B9-465A-AF0F-E5C44938D111}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ProtoBufConnection</RootNamespace>
-    <AssemblyName>ProtoBufConnection</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <RootNamespace>JsonFxMessage</RootNamespace>
+    <AssemblyName>JsonFxMessage</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,26 +31,21 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="protobuf-net">
-      <HintPath>..\3Party\protobuf-net\net\protobuf-net.dll</HintPath>
+    <Reference Include="JsonFx.Json">
+      <HintPath>..\3Party\JsonFx\JsonFx.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensioins\IExtensibleExtensions.cs" />
-    <Compile Include="Message\MessagePackage.proto.cs" />
+    <Compile Include="Message\MessagePackage.cs" />
     <Compile Include="Message\MessageSerializer.cs" />
-    <Compile Include="Message\MessageTypeID.cs" />
-    <Compile Include="Message\MessageTypeParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\Eddy\Eddy.csproj">
       <Project>{b3f5c7b4-e588-4a58-85fb-9dad7e0fec40}</Project>
