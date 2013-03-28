@@ -20,6 +20,17 @@ namespace EchoClient
     {
         static void Main(string[] args)
         {
+            string url = "";
+
+            if (args.Length >= 1)
+            {
+                url = args[0];
+            }
+            else
+            {
+                url = "tyrenus.gamextasy.com";
+            }
+
             SimpleDispatcher dispatcher;
             MessageTcpClient client;
             dispatcher = SimpleDispatcher.CurrentDispatcher;
@@ -46,8 +57,10 @@ namespace EchoClient
                 Console.WriteLine("disconnected:" + e.Message);
             };
 
-            var ip = new IPAddress(new byte[] { 127, 0, 0, 1 });
-            client.Connect(new IPEndPoint(ip, 9528));
+            var ip = System.Net.Dns.GetHostAddresses(url);
+            Console.WriteLine(ip.Length);
+            Console.WriteLine(ip[0]);
+            client.Connect(new IPEndPoint(ip[0], 9528));
             dispatcher.Run();
         }
     }

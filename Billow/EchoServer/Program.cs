@@ -31,7 +31,7 @@ namespace EchoServer
                 });
             });
             service.MessageDeserializeFailed += (e) => { Console.WriteLine(e.Message); };
-            var ip = new IPAddress(new byte[] { 127, 0, 0, 1 });
+            var ip = IPAddress.Any;
             service.Listen(new IPEndPoint(ip, 9528));
             dispatcher.Run();
         }
