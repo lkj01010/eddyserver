@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Eddy.Message;
+using Eddy.ProtoBufConnection.Message;
+using Eddy.Net;
 
-namespace Eddy.Net
+namespace Eddy.ProtoBufConnection.Net
 {
-    sealed public class MessageTcpService : TcpService
+    sealed public class ProtoBufTcpService : TcpService
     {
-        private MessageTcpHandlers handlers;
+        private ProtoBufTcpHandlers handlers;
 
         public event Action<Exception> MessageDeserializeFailed
         {
@@ -16,16 +17,16 @@ namespace Eddy.Net
             remove { handlers.MessageDeserializeFailed -= value; }
         }
 
-        public MessageTcpService(MessageSerializer serializer,
+        public ProtoBufTcpService(MessageSerializer serializer,
             Action<TcpSession, object> messageHandler) : 
             this(serializer, messageHandler, () => new TcpSession())
         {
         }
 
-        public MessageTcpService(MessageSerializer serializer,
+        public ProtoBufTcpService(MessageSerializer serializer,
             Action<TcpSession, object> messageHandler, Func<TcpSession> creator)
         {
-            handlers = new MessageTcpHandlers(serializer);
+            handlers = new ProtoBufTcpHandlers(serializer);
             base.Initialize(() => 
             {
                 var session = creator();
@@ -41,10 +42,10 @@ namespace Eddy.Net
         /// </summary>
         /// <param name="serializer"></param>
         /// <param name="initializer"></param>
-        public MessageTcpService(MessageSerializer serializer, 
-            Func<MessageTcpHandlers, TcpSession> initializer)
+        public ProtoBufTcpService(MessageSerializer serializer, 
+            Func<ProtoBufTcpHandlers, TcpSession> initializer)
         {
-            handlers = new MessageTcpHandlers(serializer);
+            handlers = new ProtoBufTcpHandlers(serializer);
             base.Initialize(() => initializer(handlers));
         }
     }

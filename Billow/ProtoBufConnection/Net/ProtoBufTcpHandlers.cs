@@ -1,16 +1,17 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using Eddy.Message;
+using Eddy.ProtoBufConnection.Message;
+using Eddy.Net;
 
-namespace Eddy.Net
+namespace Eddy.ProtoBufConnection.Net
 {
     /// <summary>
     /// 网络连接数据处理类，创建序列化和反序列化消息的delegate
     /// </summary>
-    public class MessageTcpHandlers
+    public class ProtoBufTcpHandlers
     {
-        public MessageTcpHandlers(MessageSerializer serializer)
+        public ProtoBufTcpHandlers(MessageSerializer serializer)
         {
             this.serializer = serializer;
         }

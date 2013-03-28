@@ -74,10 +74,6 @@
     </Reference>
     <Reference Include="System.Xml">
     </Reference>
-    <Reference Include="protobuf-net, Version=1.0.0.282, Culture=neutral, PublicKeyToken=257b51d87d2e4d67">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\3Party\protobuf-net\net\protobuf-net.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Coroutine\Controller.cs" />
@@ -93,17 +89,9 @@
     <Compile Include="DateTimeProvider.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
-    <Compile Include="Extensions\IExtensibleExtensions.cs" />
     <Compile Include="Extensions\SortedListExtensions.cs" />
     <Compile Include="MD5Hash.cs" />
     <Compile Include="Coroutine\MessageDispatcher.cs" />
-    <Compile Include="Message\ExecuteAttribute.cs" />
-    <Compile Include="Message\MessagePackage.proto.cs" />
-    <Compile Include="Message\MessageSerializer.cs" />
-    <Compile Include="Message\MessageTypeID.cs" />
-    <Compile Include="Message\MessageTypeParser.cs" />
-    <Compile Include="Net\MessageTcpClient.cs" />
-    <Compile Include="Net\MessageTcpService.cs" />
     <Compile Include="Net\PackageHead.cs" />
     <Compile Include="Net\PackageHeadFlags.cs" />
     <Compile Include="OneShotEvent.cs" />
@@ -117,7 +105,6 @@
     <Compile Include="Net\TcpService.cs" />
     <Compile Include="Net\TcpClient.cs" />
     <Compile Include="Net\TcpSession.cs" />
-    <Compile Include="Net\MessageTcpHandlers.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

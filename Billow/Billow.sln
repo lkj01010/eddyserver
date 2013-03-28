@@ -1,9 +1,11 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eddy", "Eddy\Eddy.csproj", "{B3F5C7B4-E588-4A58-85FB-9DAD7E0FEC40}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EddyTest", "EddyTest\EddyTest.csproj", "{8F73E6C3-8436-40C0-957F-58E713BC3C02}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtoBufConnection", "ProtoBufConnection\ProtoBufConnection.csproj", "{EFE0EDF4-81A6-42AE-B3AD-54185286A818}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -22,6 +24,10 @@ Global
 		{8F73E6C3-8436-40C0-957F-58E713BC3C02}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F73E6C3-8436-40C0-957F-58E713BC3C02}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F73E6C3-8436-40C0-957F-58E713BC3C02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFE0EDF4-81A6-42AE-B3AD-54185286A818}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFE0EDF4-81A6-42AE-B3AD-54185286A818}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFE0EDF4-81A6-42AE-B3AD-54185286A818}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFE0EDF4-81A6-42AE-B3AD-54185286A818}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -29,7 +35,7 @@ Global
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Eddy\Eddy.csproj
 		Policies = $0
-		$0.TextStylePolicy = $1
+		$0.TextStylePolicy = $10
 		$1.FileWidth = 40
 		$1.TabWidth = 4
 		$1.EolMarker = Windows
@@ -43,7 +49,6 @@ Global
 		$0.DotNetNamingPolicy = $3
 		$3.DirectoryNamespaceAssociation = None
 		$3.ResourceNamePolicy = FileFormatDefault
-		$0.TextStylePolicy = $4
 		$4.FileWidth = 120
 		$4.TabWidth = 4
 		$4.inheritsSet = Mono
@@ -63,7 +68,6 @@ Global
 		$8.MessageStyle = $9
 		$9.LineAlign = 0
 		$8.inheritsSet = Mono
-		$0.TextStylePolicy = $10
 		$10.FileWidth = 120
 		$10.TabWidth = 4
 		$10.inheritsSet = Mono

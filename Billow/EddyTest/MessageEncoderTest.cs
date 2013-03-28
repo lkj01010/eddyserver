@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Eddy.Message;
+using Eddy.ProtoBufConnection.Message;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ProtoBuf;
 

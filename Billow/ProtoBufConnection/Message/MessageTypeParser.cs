@@ -5,7 +5,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace Eddy.Message
+namespace Eddy.ProtoBufConnection.Message
 {
 	/// <summary>
 	/// 消息类型ID<see cref="MessageTypeID"/>和对应<see cref="ProtoBuf.IExtensible"/>类型的解析器

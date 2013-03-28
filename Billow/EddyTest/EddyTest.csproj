@@ -85,6 +85,10 @@
       <Project>{B3F5C7B4-E588-4A58-85FB-9DAD7E0FEC40}</Project>
       <Name>Eddy</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ProtoBufConnection\ProtoBufConnection.csproj">
+      <Project>{efe0edf4-81a6-42ae-b3ad-54185286a818}</Project>
+      <Name>ProtoBufConnection</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

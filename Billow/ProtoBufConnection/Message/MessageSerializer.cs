@@ -6,7 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Diagnostics;
 
-namespace Eddy.Message
+namespace Eddy.ProtoBufConnection.Message
 {
 	/// <summary>
 	/// <see cref="ProtoBuf.IExtensible"/>对象和字节流间的编码器

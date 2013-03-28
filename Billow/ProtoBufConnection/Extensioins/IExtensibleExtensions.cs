@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Eddy.Extensions
+namespace Eddy.ProtoBufConnection.Extensions
 {
 	public static class IExtensibleExtent
 	{

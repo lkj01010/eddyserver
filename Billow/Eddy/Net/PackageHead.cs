@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
 
 namespace Eddy.Net
 {
 	/// <summary>
 	/// 网络封包包头
 	/// </summary>
-	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct PackageHead
 	{
 		/// <summary>
@@ -22,18 +19,17 @@ namespace Eddy.Net
 		/// </summary>
 		public ushort MessageLength;
 
-
-		private readonly static int s_size;
 		/// <summary>
 		/// 包头的字节大小
 		/// </summary>
-		public static int SizeOf { get { return s_size; } }
-
-		static PackageHead()
-		{
-            s_size = System.Runtime.InteropServices.Marshal.SizeOf(typeof(PackageHead));
-		}
-
+        public static int SizeOf
+        {
+            get
+            {
+                return sizeof(ushort) + sizeof(PackageHeadFlags);
+            }
+        }
+		
 		public void WriteTo(System.IO.Stream stream)
 		{
 			byte[] buf = new byte[SizeOf];
