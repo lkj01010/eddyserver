@@ -28,7 +28,7 @@ namespace EchoClient
             }
             else
             {
-                url = "tyrenus.gamextasy.com";
+                url = "127.0.0.1";//"tyrenus.gamextasy.com";
             }
 
             SimpleDispatcher dispatcher;

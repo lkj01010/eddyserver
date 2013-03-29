@@ -88,6 +88,7 @@ namespace Eddy
                     return;
                 wait.WaitOne();
                 wait.Reset();
+                Thread.Sleep(0);
             }
         }
 

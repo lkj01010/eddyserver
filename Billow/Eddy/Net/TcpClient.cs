@@ -11,6 +11,7 @@ namespace Eddy.Net
     public class TcpClient
     {
         private Func<TcpSession> sessionCreator;
+        public bool IsConnected { get { return Session != null && Session.IsConnected; } }
         public TcpSession Session { get; private set; }
         public event Action<Exception> ExceptionHandler;
 

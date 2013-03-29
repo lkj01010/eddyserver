@@ -29,6 +29,10 @@ namespace Eddy.Net
 
         public const int DefaultBufferSize = 128;
 
+        public bool IsConnected
+        {
+            get { return socket.Connected; }
+        }
 
         /// <summary>
         /// 接收数据处理，必须保证线程安全

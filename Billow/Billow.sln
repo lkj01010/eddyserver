@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtoBufMessage", "ProtoBuf
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoClient", "EchoClient\EchoClient.csproj", "{E98BB316-7DF8-4F18-8C7B-11472653DD20}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoStressTest", "EchoStressTest\EchoStressTest.csproj", "{D2829526-999F-42F3-9792-3CE547E232C6}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Eddy.vsmdi
@@ -46,6 +48,10 @@ Global
 		{E98BB316-7DF8-4F18-8C7B-11472653DD20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E98BB316-7DF8-4F18-8C7B-11472653DD20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E98BB316-7DF8-4F18-8C7B-11472653DD20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2829526-999F-42F3-9792-3CE547E232C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2829526-999F-42F3-9792-3CE547E232C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2829526-999F-42F3-9792-3CE547E232C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2829526-999F-42F3-9792-3CE547E232C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
