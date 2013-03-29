@@ -8,8 +8,8 @@ using System.Net;
 using Eddy.Net;
 class Message
 {
-    public int ID;
-    public string Name;
+    public int ID = 0;
+    public string Name = "";
 }
 
 namespace EchoServer
@@ -21,6 +21,7 @@ namespace EchoServer
             var dispatcher = SimpleDispatcher.CurrentDispatcher;
             var serializer = new MessageSerializer();
             serializer.Register<Message>();
+            serializer.Register<string>();
             HashSet<TcpSession> sessions = new HashSet<TcpSession>();
 
             // 初始化service
@@ -28,14 +29,20 @@ namespace EchoServer
             {
                 dispatcher.Invoke(() =>
                 {
-                    sessions.Add(session);
-                    session.Disconnected += (e) =>
-                    {
-                        Console.WriteLine("Disconnected:" + e.Message);
-                        sessions.Remove(session);
-                    };
                     session.Send(o);
                 });
+            },
+            () =>
+            {
+                var session = new TcpSession();
+                Console.WriteLine("connected");
+                sessions.Add(session);
+                session.Disconnected += (e) =>
+                {
+                    Console.WriteLine("Disconnected:" + e.Message);
+                    sessions.Remove(session);
+                };
+                return session;
             });
             service.MessageDeserializeFailed += (e) => { Console.WriteLine(e.Message); };
             var ip = IPAddress.Any;

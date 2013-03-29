@@ -42,7 +42,7 @@ namespace Eddy.JsonFxMessage
 
 		public object Deserialize(byte[] messagePackageData)
 		{
-            return Deserialize(messagePackageData, 0, 0);
+            return Deserialize(messagePackageData, 0, messagePackageData.Length);
 		}
 
 		public object Deserialize(byte[] messagePackageData, int offset, int count)
